@@ -1,0 +1,26 @@
+%form#add_budgeted_expense{:action => "#", :method => "post", :onsubmit => "return false"}
+  %div
+    %label{:for => "add_budget_description"} Description
+    %input#add_budget_description.description{:type => "text"}
+  %div
+    %label{:for => "add_budget_amount"} Amount
+    %input#add_budget_amount.amount{:type => "text"}
+  %div
+    %label{:for => "add_budget_Payee"} Payee
+    %input#add_budget_payee.payee{:type => "text"}
+  %div
+    %label{:for => "add_budget_timing"} Timing
+    %select#add_budget_timing.timing
+      %option{:value => "Monthly"} Monthly
+      %option Yearly
+  %div
+    %input.add_budgeted_expense{:type => "submit", :value => "Add Budgeted Expense"}/
+%table#budgeted_list
+  %thead
+    %tr
+      %th Description
+      %th Payee
+      %th Amount
+      %th Timing
+      %th Actions
+  %tbody
