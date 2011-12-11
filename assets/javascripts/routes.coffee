@@ -1,4 +1,4 @@
-window.ApplicationController = Backbone.Router.extend
+window.App.ApplicationController = Backbone.Router.extend
   routes:
     '': 'budgeted'
     'overview': 'overview'
@@ -8,8 +8,9 @@ window.ApplicationController = Backbone.Router.extend
     'history': 'history'
 
   budgeted: ->
-    view = new BudgetedListView()
-    @tab('budgeted', view.render().el)
+    view = new App.BudgetedTableView()
+    $("#main > section").remove()
+    $("#main").append(view.render())
 
   overview: ->
     @tab('overview', 'overview')
@@ -24,9 +25,9 @@ window.ApplicationController = Backbone.Router.extend
     @tab('history', 'history')
   
   tab: (page, content) ->
-    $("#main > div").hide()
-    $("#" + page).show().html(content)
+    $("#main > div").remove()
+    $("#" + page).show()
 
 $ ->
-  new ApplicationController()
+  new App.ApplicationController()
   Backbone.history.start()

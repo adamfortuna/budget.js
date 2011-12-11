@@ -168,6 +168,8 @@ Backbone.sync = function(method, model, options, error) {
   }
 };
 
+  window.App = {};
+
   window.Expense = Backbone.Model.extend({
     weekly_amount: function() {
       return this.amount * 12 / 52;
@@ -181,52 +183,19 @@ Backbone.sync = function(method, model, options, error) {
     initialize: function() {}
   });
 
-  window.BudgetedExpenseList = Backbone.Collection.extend({
-    model: BudgetedExpense,
-    localStorage: new Store('budgeted_expense_list')
+  window.App.BudgetedExpenseList = Backbone.Collection.extend({
+    localStorage: new Store('budgeted_expense_list'),
+    model: BudgetedExpense
   });
 
-  window.BudgetedListView = Backbone.View.extend({
-    tagName: 'tbody',
-    form: $("#add_budgeted_expense"),
-    events: {
-      'submit #add_budgeted_expense': 'addBudgetExpense'
-    },
-    initialize: function() {
-      _.bindAll(this, 'render', 'addBudgetExpense', 'appendBudgetExpense');
-      this.collection = new BudgetedExpenseList();
-      return this.collection.bind('add', this.appendBudgetExpense);
-    },
-    render: function() {
-      _(this.collection.models).each((function(budgetExpense) {
-        return appendBudgetExpense(budgetExpense);
-      }), this);
-      return this.el;
-    },
-    addBudgetExpense: function(data) {
-      var budgetedExpense;
-      budgetedExpense = new BudgetedExpense({
-        amount: this.form.find(".amount").val(),
-        description: $("#add_budgeted_expense .description").val(),
-        payee: $("#add_budgeted_expense .payee").val(),
-        timing: $("#add_budgeted_expense .timing").val()
-      });
-      this.form[0].reset();
-      return this.collection.add(budgetedExpense);
-    },
-    appendBudgetExpense: function(budgetedExpense) {
-      var budgetedSingleView;
-      budgetedSingleView = new BudgetedSingleView({
-        model: budgetedExpense
-      });
-      return $(this.el).append(budgetedSingleView.render().el);
-    }
-  });
+  window.App.BudgetedExpenses = new App.BudgetedExpenseList;
 
-  window.BudgetedSingleView = Backbone.View.extend({
+  window.App.BudgetedSingleView = Backbone.View.extend({
     tagName: 'tr',
     events: {
-      'click .delete': 'remove'
+      'click .delete': 'remove',
+      'click .edit': 'edit',
+      'submit .edit': 'stopEditing'
     },
     initialize: function() {
       _.bindAll(this, 'render', 'unrender', 'remove');
@@ -238,19 +207,69 @@ Backbone.sync = function(method, model, options, error) {
       return this;
     },
     template: function(data) {
-      var compiled;
-      compiled = _.template("<td><%= description %></td><td><%= payee %></td><td><%= amount %></td><td><%= timing %></td><td><a href='#budeted' class='delete'>remove</a></td>");
-      return compiled(data);
+      var template;
+      template = _.template($("#budgeted_single_template").text());
+      return template(data);
     },
     unrender: function() {
       return $(this.el).remove();
     },
     remove: function() {
       return this.model.destroy();
+    },
+    edit: function() {
+      return $(this.el).addClass("editing");
+    },
+    stopEditing: function() {
+      return $(this.el).removeClass("editing");
     }
   });
 
-  window.ApplicationController = Backbone.Router.extend({
+  window.App.BudgetedTableView = Backbone.View.extend({
+    tagName: 'section',
+    events: {
+      'submit #add_budgeted_expense': 'addBudgetExpense'
+    },
+    initialize: function() {
+      _.bindAll(this, 'render', 'addBudgetExpense', 'appendBudgetExpense');
+      this.collection = App.BudgetedExpenses;
+      return this.collection.bind('add', this.appendBudgetExpense);
+    },
+    render: function() {
+      $(this.el).append(this.template());
+      console.log(this.collection.models);
+      this.collection.fetch();
+      _(this.collection.models).each((function(budgetExpense) {
+        return this.appendBudgetExpense(budgetExpense);
+      }), this);
+      return this.el;
+    },
+    template: function() {
+      var template;
+      template = _.template($("#budgeted_template").text());
+      return template.apply(this, arguments);
+    },
+    addBudgetExpense: function(data) {
+      var form;
+      form = $(this.el).find("form");
+      this.collection.create({
+        amount: form.find(".amount").val(),
+        description: form.find(".description").val(),
+        payee: form.find(".payee").val(),
+        timing: form.find(".timing").val()
+      });
+      return form[0].reset();
+    },
+    appendBudgetExpense: function(budgetedExpense) {
+      var budgetedSingleView;
+      budgetedSingleView = new App.BudgetedSingleView({
+        model: budgetedExpense
+      });
+      return $(this.el).find("tbody#budgeted_expenses_body").prepend(budgetedSingleView.render().el);
+    }
+  });
+
+  window.App.ApplicationController = Backbone.Router.extend({
     routes: {
       '': 'budgeted',
       'overview': 'overview',
@@ -261,8 +280,9 @@ Backbone.sync = function(method, model, options, error) {
     },
     budgeted: function() {
       var view;
-      view = new BudgetedListView();
-      return this.tab('budgeted', view.render().el);
+      view = new App.BudgetedTableView();
+      $("#main > section").remove();
+      return $("#main").append(view.render());
     },
     overview: function() {
       return this.tab('overview', 'overview');
@@ -277,15 +297,16 @@ Backbone.sync = function(method, model, options, error) {
       return this.tab('history', 'history');
     },
     tab: function(page, content) {
-      $("#main > div").hide();
-      return $("#" + page).show().html(content);
+      $("#main > div").remove();
+      return $("#" + page).show();
     }
   });
 
   $(function() {
-    new ApplicationController();
+    new App.ApplicationController();
     return Backbone.history.start();
   });
+
 
 
 

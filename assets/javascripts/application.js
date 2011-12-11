@@ -2,6 +2,7 @@
 //= require vendor/underscore-min.js
 //= require vendor/backbone-min.js
 //= require vendor/backbone.localStorage.js
+//= require setup
 //= require_tree ./models
 //= require_tree ./collections
 //= require_tree ./views

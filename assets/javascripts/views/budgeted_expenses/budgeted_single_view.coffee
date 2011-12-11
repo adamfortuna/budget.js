@@ -1,7 +1,9 @@
-window.BudgetedSingleView = Backbone.View.extend
+window.App.BudgetedSingleView = Backbone.View.extend
   tagName: 'tr'
   events: 
     'click .delete': 'remove'
+    'click .edit': 'edit'
+    'submit .edit': 'stopEditing'
 
   initialize: ->
     _.bindAll(this, 'render', 'unrender', 'remove')
@@ -13,11 +15,17 @@ window.BudgetedSingleView = Backbone.View.extend
     return @
 
   template: (data) ->
-    compiled = _.template("<td><%= description %></td><td><%= payee %></td><td><%= amount %></td><td><%= timing %></td><td><a href='#budeted' class='delete'>remove</a></td>")
-    compiled(data)
+    template = _.template($("#budgeted_single_template").text());
+    template(data);
   
   unrender: ->
     $(@el).remove()
   
   remove: ->
     @model.destroy()
+  
+  edit: ->
+    $(this.el).addClass("editing")
+  
+  stopEditing: ->
+    $(this.el).removeClass("editing")

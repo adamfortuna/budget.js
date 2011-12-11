@@ -16,13 +16,40 @@
       %li
         %a{ href: '#history' } History
   #main
-    #budgeted
-      %p Budgeted Page
-    #overview
-      %p Overview
-    #savings
-      %p Savings
-    #expenses
-      %p Expenses
-    #history
-      %p History
+
+  %script{ type: "text/html", id: "budgeted_template" }
+    %h2 Budgeted Expenses
+    %table{ id: 'budgeted_expenses' }
+      %thead
+        %tr
+          %th Description
+          %th Payee
+          %th Amount
+          %th Timing
+          %th Actions
+        %tr
+          %td{colspan: 5 }
+            %form{ id: 'add_budgeted_expense', method: "post", action:"#", onsubmit:"return false" }
+              %table
+                %tr
+                  %td
+                    %input{ type: 'text', class: "description" }
+                  %td
+                    %input{ type: 'text', class: "payee" }
+                  %td
+                    %input{ type: 'text', class: "amount" }
+                  %td
+                    %select{ class: "timing" }
+                      %option{ value: "Monthly" } Monthly
+                      %option{ value: "Yearly" } Yearly
+                  %td
+                    %input{ type: 'submit', value: 'Add Expense', class: 'add' }
+      %tbody{ id: "budgeted_expenses_body" }
+  %script{type: "text/html", id: "budgeted_single_template" }
+    %td <%= description %>
+    %td <%= payee %></td>
+    %td <%= amount %></td>
+    %td <%= timing %></td>
+    %td
+      %a{ href: '#budgeted', class: 'delete' } remove
+      %a{ href: '#budgeted', class: 'edit' } edit

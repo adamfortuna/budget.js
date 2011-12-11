@@ -1,3 +1,4 @@
+%h2 Budgeted Expenses
 %form#add_budgeted_expense{:action => "#", :method => "post", :onsubmit => "return false"}
   %div
     %label{:for => "add_budget_description"} Description
@@ -14,7 +15,7 @@
       %option{:value => "Monthly"} Monthly
       %option Yearly
   %div
-    %input.add_budgeted_expense{:type => "submit", :value => "Add Budgeted Expense"}/
+    %input.add_budgeted_expense{:type => "submit", :value => "Add Budgeted Expense"}
 %table#budgeted_list
   %thead
     %tr
