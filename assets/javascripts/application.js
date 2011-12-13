@@ -1,7 +1,12 @@
 //= require vendor/jquery-1.7.1.min.js
+//= require vendor/jquery-ui.js
 //= require vendor/underscore-min.js
 //= require vendor/backbone-min.js
 //= require vendor/backbone.localStorage.js
+//= require vendor/backbone.localStorage.js
+//= require vendor/colResizable.min.js
+//= require vendor/jquery.dataTables.js
+//= require vendor/jquery.formatCurrency-1.4.0.min
 //= require setup
 //= require_tree ./models
 //= require_tree ./collections

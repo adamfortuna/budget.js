@@ -1,0 +1,4 @@
+#budgeted_expenses_body tr.editing .delete, #budgeted_expenses_body tr.editing .edit { display:none; }
+#budgeted_expenses_body tr .update, #budgeted_expenses_body tr .cancel { display:none; }
+#budgeted_expenses_body tr.editing .update, #budgeted_expenses_body tr.editing .cancel { display: inline-block; }
+

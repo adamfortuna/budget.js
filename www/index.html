@@ -1,80 +1,209 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
-  <link href='stylesheets/application.css' media='screen' rel='stylesheet' />
+  <link href='stylesheets/style.css' media='screen' rel='stylesheet' />
+  <link href='http://fonts.googleapis.com/css?family=Cuprum' rel='stylesheet' type='text/css' />
   <script src='javascripts/application.js'></script>
 </head>
 <body>
   <nav>
     <ul>
-      <li>
-        <a href='#budgeted'>Budgeted Expenses</a>
+      <li class='cal'>
+        <a href='#budgeted'>
+          <span>Budgeted Expenses</span>
+        </a>
       </li>
-      <li>
-        <a href='#overview'>Overview</a>
+      <li class='cal'>
+        <a href='#income'>
+          <span>Income</span>
+        </a>
       </li>
-      <li>
-        <a href='#savings'>Savings</a>
+      <li class='cal'>
+        <a href='#overview'>
+          <span>Overview</span>
+        </a>
       </li>
-      <li>
-        <a href='#expenses'>Expenses</a>
+      <li class='gallery'>
+        <a href='#savings'>
+          <span>Savings</span>
+        </a>
       </li>
-      <li>
-        <a href='#history'>History</a>
+      <li class='cal'>
+        <a href='#expenses'>
+          <span>Expenses</span>
+        </a>
+      </li>
+      <li class='graphs'>
+        <a href='#history'>
+          <span>History</span>
+        </a>
       </li>
     </ul>
   </nav>
-  <div id='main'></div>
+  <div class='content'>
+    <div id='main'></div>
+  </div>
   <script id='budgeted_template' type='text/html'>
-    <h2>Budgeted Expenses</h2>
-    <table id='budgeted_expenses'>
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Payee</th>
-          <th>Amount</th>
-          <th>Timing</th>
-          <th>Actions</th>
-        </tr>
-        <tr>
-          <td colspan='5'>
-            <form action='#' id='add_budgeted_expense' method='post' onsubmit='return false'>
-              <table>
-                <tr>
-                  <td>
-                    <input class='description' type='text' />
-                  </td>
-                  <td>
-                    <input class='payee' type='text' />
-                  </td>
-                  <td>
-                    <input class='amount' type='text' />
-                  </td>
-                  <td>
-                    <select class='timing'>
-                      <option value='Monthly'>Monthly</option>
-                      <option value='Yearly'>Yearly</option>
-                    </select>
-                  </td>
-                  <td>
-                    <input class='add' type='submit' value='Add Expense' />
-                  </td>
-                </tr>
-              </table>
-            </form>
-          </td>
-        </tr>
-      </thead>
-      <tbody id='budgeted_expenses_body'></tbody>
-    </table>
+    <div class='title'>
+      <h5>Budgeted Expenses</h5>
+    </div>
+    <div>
+      <a class='add right' href='#budgeted' id='add_budget_expense'>Add A Budgeted Expense</a>
+    </div>
+    <section class='widget table'>
+      <div class='head'>
+        <h5 class='iFrames'>
+          Budgeted Expenses
+        </h5>
+      </div>
+      <table class='display datatable' id='budgeted_expenses'>
+        <thead>
+          <tr id='add_budgeted_expense_wrapper' style='display:none;'>
+            <td>
+              <input class='description' type='text' />
+            </td>
+            <td>
+              <input class='payee' type='text' />
+            </td>
+            <td>
+              <input class='amount' type='text' />
+            </td>
+            <td class='center'>
+              <select class='timing'>
+                <option value='Monthly'>Monthly</option>
+                <option value='Yearly'>Yearly</option>
+              </select>
+            </td>
+            <td>
+              <input id='add_budgeted_expense' type='submit' value='Add' />
+              <a class='hide' href='#budgeted'>cancel</a>
+            </td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <th>Payee</th>
+            <th>Amount</th>
+            <th>Timing</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id='budgeted_expenses_body'></tbody>
+      </table>
+    </section>
   </script>
   <script id='budgeted_single_template' type='text/html'>
-    <td><%= description %></td>
-    <td><%= payee %></td></td>
-    <td><%= amount %></td></td>
-    <td><%= timing %></td></td>
+    <td>
+      <span><%= description %></span>
+      <input type="text" class="description" value="<%= description %>" />
+    </td>
+    <td>
+      <span><%= payee %></span>
+      <input type="text" class="payee" value="<%= payee %>" />
+    </td>
+    <td>
+      <span><%= amount %></span>
+      <input type="text" class="amount" value="<%= amount %>" />
+    </td>
+    <td>
+      <span><%= timing %></span>
+      <input type="text" class="timing" value="<%= timing %>" />
+    </td>
     <td>
       <a class='delete' href='#budgeted'>remove</a>
       <a class='edit' href='#budgeted'>edit</a>
+      <input class='button update' type='submit' value='Update' />
+      <a class='cancel' href='#budgeted'>cancel</a>
+    </td>
+  </script>
+  <script id='stats_template' type='text/html'>
+    <ul>
+      <li>
+        <span class='count' id='stats_cash_flow'></span>
+        <span>cash flow</span>
+      </li>
+      <li>
+        <span class='count' id='stats_spending'></span>
+        <span>spending</span>
+      </li>
+      <li>
+        <span class='count' id='stats_income'></span>
+        <span>income</span>
+      </li>
+      <li>
+        <span class='count' id='stats_savings'></span>
+        <span>savings</span>
+      </li>
+    </ul>
+  </script>
+  <script id='income_template' type='text/html'>
+    <div class='title'>
+      <h5>Income</h5>
+    </div>
+    <div>
+      <a class='add right' href='#income' id='show_form'>Add</a>
+    </div>
+    <section class='widget table'>
+      <div class='head'>
+        <h5 class='iFrames'>
+          Income
+        </h5>
+      </div>
+      <table class='display datatable' id='incomes'>
+        <thead>
+          <tr id='add_income_wrapper' style='display:none;'>
+            <td>
+              <input class='description' type='text' />
+            </td>
+            <td>
+              <input class='payee' type='text' />
+            </td>
+            <td>
+              <input class='amount' type='text' />
+            </td>
+            <td class='center'>
+              <select class='timing'>
+                <option value='Monthly'>Monthly</option>
+                <option value='Yearly'>Yearly</option>
+              </select>
+            </td>
+            <td>
+              <input id='add_income' type='submit' value='Add' />
+              <a class='hide' href='#income'>cancel</a>
+            </td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <th>Payee</th>
+            <th>Amount</th>
+            <th>Timing</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id='income_body'></tbody>
+      </table>
+    </section>
+  </script>
+  <script id='income_single_template' type='text/html'>
+    <td>
+      <span><%= description %></span>
+      <input type="text" class="description" value="<%= description %>" />
+    </td>
+    <td>
+      <span><%= payee %></span>
+      <input type="text" class="payee" value="<%= payee %>" />
+    </td>
+    <td>
+      <span><%= amount %></span>
+      <input type="text" class="amount" value="<%= amount %>" />
+    </td>
+    <td>
+      <span><%= timing %></span>
+      <input type="text" class="timing" value="<%= timing %>" />
+    </td>
+    <td>
+      <a class='delete' href='#income'>remove</a>
+      <a class='edit' href='#income'>edit</a>
+      <input class='button update' type='submit' value='Update' />
+      <a class='cancel' href='#income'>cancel</a>
     </td>
   </script>
 </body>

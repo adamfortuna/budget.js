@@ -6,11 +6,27 @@ window.App.ApplicationController = Backbone.Router.extend
     'budgeted': 'budgeted'
     'expenses': 'expenses'
     'history': 'history'
+    'income': 'income'
 
   budgeted: ->
     view = new App.BudgetedTableView()
     $("#main > section").remove()
     $("#main").append(view.render())
+    $('.datatable').dataTable(
+      "bJQueryUI": true,
+      "sPaginationType": "full_numbers",
+      "sDom": '<""f>t<"F"lp>'
+    )
+  
+  income: ->
+    view = new App.IncomeTableView()
+    $("#main > section").remove()
+    $("#main").append(view.render())
+    $('.datatable').dataTable(
+      "bJQueryUI": true,
+      "sPaginationType": "full_numbers",
+      "sDom": '<""f>t<"F"lp>'
+    )
 
   overview: ->
     @tab('overview', 'overview')
@@ -30,4 +46,5 @@ window.App.ApplicationController = Backbone.Router.extend
 
 $ ->
   new App.ApplicationController()
+  new App.StatsView()
   Backbone.history.start()

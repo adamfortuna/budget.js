@@ -1,9 +1,12 @@
 window.App.BudgetedSingleView = Backbone.View.extend
   tagName: 'tr'
   events: 
+    'click span': 'activateForm'
     'click .delete': 'remove'
     'click .edit': 'edit'
-    'submit .edit': 'stopEditing'
+    'click .update': 'update'
+    'click .cancel': 'cancel'
+    'keyup input': 'checkForSubmit'
 
   initialize: ->
     _.bindAll(this, 'render', 'unrender', 'remove')
@@ -27,5 +30,24 @@ window.App.BudgetedSingleView = Backbone.View.extend
   edit: ->
     $(this.el).addClass("editing")
   
+  checkForSubmit: (e) ->
+    @update() if e.keyCode == 13
+    
   stopEditing: ->
     $(this.el).removeClass("editing")
+  
+  update: ->
+    @model.set(
+      amount: $(this.el).find(".amount").val()
+      description: $(this.el).find(".description").val()
+      payee: $(this.el).find(".payee").val()
+      timing: $(this.el).find(".timing").val()
+    )
+    @stopEditing()
+
+  cancel: -> 
+    @stopEditing()
+    
+  activateForm: ->
+    console.log("testing")
+    $(this.el).addClass("editing")

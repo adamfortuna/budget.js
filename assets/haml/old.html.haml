@@ -1,0 +1,78 @@
+!!!
+%head
+  %link{ href: "stylesheets/application.css", media: "screen", rel: "stylesheet" }
+  %link{ href: "http://fonts.googleapis.com/css?family=Cuprum", rel: "stylesheet", type: "text/css" }
+  %script(src='javascripts/application.js')
+  
+%body
+  %div{ class: "wrapper" }
+    %div{ class: "leftNav" }
+      %ul{ id: "menu" }
+        %li{ class: "cal" }
+          %a{ href: '#budgeted' }
+            %span Budgeted Expenses
+        %li{ class: "cal" }
+          %a{ href: '#overview' }
+            %span Overview
+        %li{ class: "gallery" }
+          %a{ href: '#savings' }
+            %span Savings
+        %li{ class: "cal" }
+          %a{ href: '#expenses' }
+            %span Expenses
+        %li{ class: "graphs" }
+          %a{ href: '#history' }
+            %span History
+    .content
+
+
+  %script{ type: "text/html", id: "budgeted_template" }
+    %div{ class: "title" }
+      %h5 Budgeted Expenses
+
+    %div{ class: 'num' }
+      %a{ href: '#budgeted', id: 'add_budget_expense' } Add A Budgeted Expense
+
+    %div{ class: "table widget"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Budgeted Expenses
+      %table{ cellpadding: "0", cellspacing: "0", border: "0", class: "display datatable", id: 'budgeted_expenses' }
+        %thead
+          %tr{ id: 'add_budgeted_expense_wrapper', style: 'display:none;'}
+            %td
+              %input{ type: 'text', class: "description" }
+            %td
+              %input{ type: 'text', class: "payee" }
+            %td
+              %input{ type: 'text', class: "amount" }
+            %td{ class: 'center' }
+              %select{ class: "timing" }
+                %option{ value: "Monthly" } Monthly
+                %option{ value: "Yearly" } Yearly
+            %td
+              %input{ type: 'submit', value: 'Add', id: 'add_budgeted_expense' }
+              %a{ href: '#budgeted', class: "hide" } cancel
+          %tr
+            %th Description
+            %th Payee
+            %th Amount
+            %th Timing
+            %th Actions
+        %tbody{ id: "budgeted_expenses_body" }
+        
+  %script{type: "text/html", id: "budgeted_single_template" }
+    %td
+      <input type="text" class="description" value="<%= description %>" />
+      %input{ type: 'text', class: 'description', value: "<%= description %>" }
+    %td
+      %input{ type: 'text', class: 'payee', value: "<%= payee %>" }
+    %td
+      %input{ type: 'text', class: 'amount', value: "<%= amount %>" }
+    %td
+      %input{ type: 'text', class: 'timing', value: "<%= timing %>" }
+    %td
+      %a{ href: '#budgeted', class: 'delete' } remove
+      %a{ href: '#budgeted', class: 'edit' } edit
+      %input{ type: 'submit', class: 'update', value: 'Update' }
+      %a{ href: '#budgeted', class: 'cancel' } cancel

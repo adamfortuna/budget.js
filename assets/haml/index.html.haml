@@ -1,55 +1,152 @@
 !!!
 %head
-  %link(href='stylesheets/application.css' media='screen' rel='stylesheet')
+  %link{ href: "stylesheets/style.css", media: "screen", rel: "stylesheet" }
+  %link{ href: "http://fonts.googleapis.com/css?family=Cuprum", rel: "stylesheet", type: "text/css" }
   %script(src='javascripts/application.js')
 %body
   %nav
     %ul
-      %li
-        %a{ href: '#budgeted' } Budgeted Expenses
-      %li
-        %a{ href: '#overview' } Overview
-      %li
-        %a{ href: '#savings' } Savings
-      %li
-        %a{ href: '#expenses' } Expenses
-      %li
-        %a{ href: '#history' } History
-  #main
+      %li{ class: "cal" }
+        %a{ href: '#budgeted' }
+          %span Budgeted Expenses
+      %li{ class: "cal" }
+        %a{ href: '#income' }
+          %span Income
+      %li{ class: "cal" }
+        %a{ href: '#overview' }
+          %span Overview
+      %li{ class: "gallery" }
+        %a{ href: '#savings' }
+          %span Savings
+      %li{ class: "cal" }
+        %a{ href: '#expenses' }
+          %span Expenses
+      %li{ class: "graphs" }
+        %a{ href: '#history' }
+          %span History
+  .content
+    #main
+
 
   %script{ type: "text/html", id: "budgeted_template" }
-    %h2 Budgeted Expenses
-    %table{ id: 'budgeted_expenses' }
-      %thead
-        %tr
-          %th Description
-          %th Payee
-          %th Amount
-          %th Timing
-          %th Actions
-        %tr
-          %td{colspan: 5 }
-            %form{ id: 'add_budgeted_expense', method: "post", action:"#", onsubmit:"return false" }
-              %table
-                %tr
-                  %td
-                    %input{ type: 'text', class: "description" }
-                  %td
-                    %input{ type: 'text', class: "payee" }
-                  %td
-                    %input{ type: 'text', class: "amount" }
-                  %td
-                    %select{ class: "timing" }
-                      %option{ value: "Monthly" } Monthly
-                      %option{ value: "Yearly" } Yearly
-                  %td
-                    %input{ type: 'submit', value: 'Add Expense', class: 'add' }
-      %tbody{ id: "budgeted_expenses_body" }
-  %script{type: "text/html", id: "budgeted_single_template" }
-    %td <%= description %>
-    %td <%= payee %></td>
-    %td <%= amount %></td>
-    %td <%= timing %></td>
+    %div{ class: "title" }
+      %h5 Budgeted Expenses
+
+    %div
+      %a{ href: '#budgeted', class: 'add right', id: 'add_budget_expense' } Add A Budgeted Expense
+
+    %section{ class: "widget table"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Budgeted Expenses
+      %table{ class: "display datatable", id: 'budgeted_expenses' }
+        %thead
+          %tr{ id: 'add_budgeted_expense_wrapper', style: 'display:none;'}
+            %td
+              %input{ type: 'text', class: "description" }
+            %td
+              %input{ type: 'text', class: "payee" }
+            %td
+              %input{ type: 'text', class: "amount" }
+            %td{ class: 'center' }
+              %select{ class: "timing" }
+                %option{ value: "Monthly" } Monthly
+                %option{ value: "Yearly" } Yearly
+            %td
+              %input{ type: 'submit', value: 'Add', id: 'add_budgeted_expense' }
+              %a{ href: '#budgeted', class: "hide" } cancel
+          %tr
+            %th Description
+            %th Payee
+            %th Amount
+            %th Timing
+            %th Actions
+        %tbody{ id: "budgeted_expenses_body" }
+        
+  %script{ type: "text/html", id: "budgeted_single_template" }
+    %td
+      %span <%= description %>
+      <input type="text" class="description" value="<%= description %>" />
+    %td
+      %span <%= payee %>
+      <input type="text" class="payee" value="<%= payee %>" />
+    %td
+      %span <%= amount %>
+      <input type="text" class="amount" value="<%= amount %>" />
+    %td
+      %span <%= timing %>
+      <input type="text" class="timing" value="<%= timing %>" />
     %td
       %a{ href: '#budgeted', class: 'delete' } remove
       %a{ href: '#budgeted', class: 'edit' } edit
+      %input{ type: 'submit', class: 'button update', value: 'Update' }
+      %a{ href: '#budgeted', class: 'cancel' } cancel
+
+  %script{ type: "text/html", id: "stats_template" }
+    %ul
+      %li
+        %span{ class: "count", id: "stats_cash_flow" }
+        %span cash flow
+      %li
+        %span{ class: "count", id: "stats_spending" }
+        %span spending
+      %li
+        %span{ class: "count", id: "stats_income" }
+        %span income
+      %li
+        %span{ class: "count", id: "stats_savings" }
+        %span savings
+        
+  %script{ type: "text/html", id: "income_template" }
+    %div{ class: "title" }
+      %h5 Income
+
+    %div
+      %a{ href: '#income', class: 'add right', id: 'show_form' } Add 
+
+    %section{ class: "widget table"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Income
+      %table{ class: "display datatable", id: 'incomes' }
+        %thead
+          %tr{ id: 'add_income_wrapper', style: 'display:none;'}
+            %td
+              %input{ type: 'text', class: "description" }
+            %td
+              %input{ type: 'text', class: "payee" }
+            %td
+              %input{ type: 'text', class: "amount" }
+            %td{ class: 'center' }
+              %select{ class: "timing" }
+                %option{ value: "Monthly" } Monthly
+                %option{ value: "Yearly" } Yearly
+            %td
+              %input{ type: 'submit', value: 'Add', id: 'add_income' }
+              %a{ href: '#income', class: "hide" } cancel
+          %tr
+            %th Description
+            %th Payee
+            %th Amount
+            %th Timing
+            %th Actions
+        %tbody{ id: "income_body" }
+
+  %script{ type: "text/html", id: "income_single_template" }
+    %td
+      %span <%= description %>
+      <input type="text" class="description" value="<%= description %>" />
+    %td
+      %span <%= payee %>
+      <input type="text" class="payee" value="<%= payee %>" />
+    %td
+      %span <%= amount %>
+      <input type="text" class="amount" value="<%= amount %>" />
+    %td
+      %span <%= timing %>
+      <input type="text" class="timing" value="<%= timing %>" />
+    %td
+      %a{ href: '#income', class: 'delete' } remove
+      %a{ href: '#income', class: 'edit' } edit
+      %input{ type: 'submit', class: 'button update', value: 'Update' }
+      %a{ href: '#income', class: 'cancel' } cancel
