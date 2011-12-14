@@ -18,13 +18,14 @@ window.App.IncomeSingleView = Backbone.View.extend
     return @
 
   template: (data) ->
-    template = _.template($("#income_single_template").text());
-    template(data);
+    template = _.template($("#single_row_template").text());
+    template(data)
   
   unrender: ->
     $(@el).remove()
   
   remove: ->
+    console.log("incomesingle view delete")
     @model.destroy()
   
   edit: ->

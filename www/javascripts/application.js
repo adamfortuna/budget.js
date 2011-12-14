@@ -8054,7 +8054,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
 
   window.App = {};
 
-  window.Expense = Backbone.Model.extend({
+  window.App.Expense = Backbone.Model.extend({
     weekly_amount: function() {
       return this.amount * 12 / 52;
     },
@@ -8063,38 +8063,108 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
-  window.BudgetedExpense = window.Expense.extend({
+  window.App.BudgetedExpense = window.App.Expense.extend({
     initialize: function() {}
   });
 
-  window.Income = Backbone.Model.extend({
+  window.App.Income = Backbone.Model.extend({
     weekly_amount: function() {
       return this.amount * 12 / 52;
     },
     daily_amount: function() {
       return this.amount * 12 / 365;
+    }
+  });
+
+  window.App.Stats = Backbone.Model.extend({
+    amount: function() {
+      return 0;
     }
   });
 
   window.App.BudgetedExpenseList = Backbone.Collection.extend({
     localStorage: new Store('budgeted_expense_list'),
-    model: BudgetedExpense
+    model: App.BudgetedExpense
   });
 
   window.App.BudgetedExpenses = new App.BudgetedExpenseList;
 
   window.App.IncomeList = Backbone.Collection.extend({
     localStorage: new Store('income_list'),
-    model: Income
+    model: App.Income
   });
 
   window.App.Incomes = new App.IncomeList;
+
+  window.App.TableView = Backbone.View.extend({
+    tagName: 'section',
+    events: {
+      'click .create': 'create',
+      'click .add_new': 'showForm',
+      'click .new_row_template .hide': 'hideForm',
+      'keyup .new_row_template input': 'checkForSubmit'
+    },
+    initialize: function() {
+      _.bindAll(this, 'render', 'create', 'addItem');
+      this.collection = this.collectionClass;
+      this.collection.fetch();
+      return this.collection.bind('add', this.addItem);
+    },
+    render: function() {
+      $(this.el).append(this.template());
+      _(this.collection.models).each((function(item) {
+        return this.addItem(item);
+      }), this);
+      return this.el;
+    },
+    template: function() {
+      var template;
+      template = _.template($(this.templateElement).text());
+      return template.apply(this, arguments);
+    },
+    checkForSubmit: function(e) {
+      if (e.keyCode === 13) {
+        return this.create();
+      } else if (e.keyCode === 27) {
+        return this.hideForm();
+      }
+    },
+    addItem: function(item) {
+      var newItem;
+      newItem = new this.rowClass({
+        model: item
+      });
+      return $(this.el).find("tbody").prepend(newItem.render().el);
+    },
+    clearForm: function() {
+      return $(this.el).find("thead input[type='text']").val("");
+    },
+    showForm: function() {
+      return $(this.el).find("table").addClass("adding");
+    },
+    hideForm: function() {
+      this.clearForm();
+      return $(this.el).find("table").removeClass("adding");
+    },
+    create: function() {
+      var form;
+      form = $(this.el).find(".new_row_template");
+      this.collection.create({
+        description: form.find(".description").val(),
+        payee: form.find(".payee").val(),
+        amount: form.find(".amount").val(),
+        timing: form.find(".timing").val()
+      });
+      this.clearForm();
+      return form.find(".description").focus();
+    }
+  });
 
   window.App.BudgetedSingleView = Backbone.View.extend({
     tagName: 'tr',
     events: {
       'click span': 'activateForm',
-      'click .delete': 'remove',
+      'click .delete': 'destroy',
       'click .edit': 'edit',
       'click .update': 'update',
       'click .cancel': 'cancel',
@@ -8111,20 +8181,25 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     },
     template: function(data) {
       var template;
-      template = _.template($("#budgeted_single_template").text());
+      template = _.template($("#single_row_template").text());
       return template(data);
     },
     unrender: function() {
       return $(this.el).remove();
     },
-    remove: function() {
+    destroy: function() {
+      console.log("removing");
       return this.model.destroy();
     },
     edit: function() {
       return $(this.el).addClass("editing");
     },
     checkForSubmit: function(e) {
-      if (e.keyCode === 13) return this.update();
+      if (e.keyCode === 13) {
+        return this.update();
+      } else if (e.keyCode === 27) {
+        return this.stopEditing();
+      }
     },
     stopEditing: function() {
       return $(this.el).removeClass("editing");
@@ -8147,64 +8222,10 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
-  window.App.BudgetedTableView = Backbone.View.extend({
-    tagName: 'section',
-    events: {
-      'click #add_budgeted_expense': 'addBudgetExpense',
-      'click #add_budget_expense': 'showForm',
-      'click #add_budgeted_expense_wrapper .hide': 'hideForm',
-      'keyup #add_budgeted_expense_wrapper input': 'checkForSubmit'
-    },
-    initialize: function() {
-      _.bindAll(this, 'render', 'addBudgetExpense', 'appendBudgetExpense');
-      this.collection = App.BudgetedExpenses;
-      return this.collection.bind('add', this.appendBudgetExpense);
-    },
-    render: function() {
-      $(this.el).append(this.template());
-      this.collection.fetch();
-      _(this.collection.models).each((function(budgetExpense) {
-        return this.appendBudgetExpense(budgetExpense);
-      }), this);
-      return this.el;
-    },
-    template: function() {
-      var template;
-      template = _.template($("#budgeted_template").text());
-      return template.apply(this, arguments);
-    },
-    checkForSubmit: function(e) {
-      if (e.keyCode === 13) return this.addBudgetExpense();
-    },
-    addBudgetExpense: function() {
-      var form;
-      form = $(this.el).find("#add_budgeted_expense_wrapper");
-      this.collection.create({
-        description: form.find(".description").val(),
-        payee: form.find(".payee").val(),
-        amount: form.find(".amount").val(),
-        timing: form.find(".timing").val()
-      });
-      this.clearForm();
-      return form.find(".description").focus();
-    },
-    appendBudgetExpense: function(budgetedExpense) {
-      var budgetedSingleView;
-      budgetedSingleView = new App.BudgetedSingleView({
-        model: budgetedExpense
-      });
-      return $(this.el).find("tbody#budgeted_expenses_body").append(budgetedSingleView.render().el);
-    },
-    clearForm: function() {
-      return $("#add_budgeted_expense_wrapper input[type='text']").val("");
-    },
-    showForm: function() {
-      return $("#add_budgeted_expense_wrapper").show();
-    },
-    hideForm: function() {
-      this.clearForm();
-      return $("#add_budgeted_expense_wrapper").hide();
-    }
+  window.App.BudgetedTableView = App.TableView.extend({
+    collectionClass: App.BudgetedExpenses,
+    rowClass: App.BudgetedSingleView,
+    templateElement: "#budgeted_template"
   });
 
   window.App.IncomeSingleView = Backbone.View.extend({
@@ -8228,13 +8249,14 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     },
     template: function(data) {
       var template;
-      template = _.template($("#income_single_template").text());
+      template = _.template($("#single_row_template").text());
       return template(data);
     },
     unrender: function() {
       return $(this.el).remove();
     },
     remove: function() {
+      console.log("incomesingle view delete");
       return this.model.destroy();
     },
     edit: function() {
@@ -8264,105 +8286,47 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
-  window.App.IncomeTableView = Backbone.View.extend({
-    tagName: 'section',
-    events: {
-      'click #add_income': 'addIncome',
-      'click #show_form': 'showForm',
-      'click #add_incomew_wrapper .hide': 'hideForm',
-      'keyup #add_income_wrapper input': 'checkForSubmit'
-    },
-    initialize: function() {
-      _.bindAll(this, 'render', 'addIncome', 'appendIncome');
-      this.collection = App.Incomes;
-      return this.collection.bind('add', this.appendIncome);
-    },
-    render: function() {
-      $(this.el).append(this.template());
-      this.collection.fetch();
-      _(this.collection.models).each((function(income) {
-        return this.appendIncome(income);
-      }), this);
-      return this.el;
-    },
-    template: function() {
-      var template;
-      template = _.template($("#income_template").text());
-      return template.apply(this, arguments);
-    },
-    checkForSubmit: function(e) {
-      if (e.keyCode === 13) return this.addIncome();
-    },
-    addIncome: function() {
-      var form;
-      form = $(this.el).find("#add_income_wrapper");
-      this.collection.create({
-        description: form.find(".description").val(),
-        payee: form.find(".payee").val(),
-        amount: form.find(".amount").val(),
-        timing: form.find(".timing").val()
-      });
-      this.clearForm();
-      return form.find(".description").focus();
-    },
-    appendIncome: function(income) {
-      var incomeSingleView;
-      incomeSingleView = new App.IncomeSingleView({
-        model: income
-      });
-      return $(this.el).find("tbody#income_body").append(incomeSingleView.render().el);
-    },
-    clearForm: function() {
-      return $("#add_income_wrapper input[type='text']").val("");
-    },
-    showForm: function() {
-      return $("#add_income_wrapper").show();
-    },
-    hideForm: function() {
-      this.clearForm();
-      return $("#add_income_wrapper").hide();
-    }
+  window.App.IncomeTableView = App.TableView.extend({
+    collectionClass: App.Incomes,
+    rowClass: App.IncomeSingleView,
+    templateElement: "#income_template"
   });
 
   window.App.StatsView = Backbone.View.extend({
     tagName: 'section',
+    className: 'stats group',
     initialize: function() {
-      _.bindAll(this, 'render', 'recalculateTotals');
+      _.bindAll(this, 'render', 'updateStats');
+      this.stats = new App.Stats();
+      this.stats.bind('change', this.render);
       this.budgetedExpenses = App.BudgetedExpenses;
-      this.budgetedExpenses.bind('add', this.recalculateTotals);
-      this.budgetedExpenses.bind('change', this.recalculateTotals);
-      this.budgetedExpenses.bind('remove', this.recalculateTotals);
+      this.budgetedExpenses.bind('add', this.updateStats);
+      this.budgetedExpenses.bind('change', this.updateStats);
+      this.budgetedExpenses.bind('remove', this.updateStats);
       this.incomes = App.Incomes;
-      this.incomes.bind('add', this.recalculateTotals);
-      this.incomes.bind('change', this.recalculateTotals);
-      this.incomes.bind('remove', this.recalculateTotals);
-      return this.render();
+      this.incomes.bind('add', this.updateStats);
+      this.incomes.bind('change', this.updateStats);
+      return this.incomes.bind('remove', this.updateStats);
     },
     render: function() {
       this.budgetedExpenses.fetch();
       this.incomes.fetch();
-      $(this.el).addClass("stats").addClass("group").append(this.template({
-        monthly_cash_flow: "",
-        spending: "",
-        income: ""
-      }));
-      $(".content").prepend($(this.el));
-      return this.recalculateTotals();
+      this.updateStats();
+      $(this.el).html(this.template(this.stats.toJSON()));
+      return this.el;
     },
     template: function() {
       var template;
       template = _.template($("#stats_template").text());
       return template.apply(this, arguments);
     },
-    recalculateTotals: function() {
-      var cash_flow, income, spending;
-      cash_flow = this.cash_flow();
-      spending = this.spending();
-      income = this.income();
-      $("#stats_cash_flow, #stats_spending, #stats_income").removeClass("green").removeClass("red");
-      $("#stats_cash_flow").html(cash_flow).addClass(this.class_for_amount(cash_flow)).formatCurrency();
-      $("#stats_spending").html(spending).addClass(this.class_for_amount(spending)).formatCurrency();
-      return $("#stats_income").html(income).addClass(this.class_for_amount(income)).formatCurrency();
+    updateStats: function() {
+      return this.stats.set({
+        cash_flow: this.cash_flow(),
+        spending: this.spending(),
+        income: this.income(),
+        savings: 0
+      });
     },
     cash_flow: function() {
       return this.income() + this.spending();
@@ -8399,8 +8363,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     budgeted: function() {
       var view;
       view = new App.BudgetedTableView();
-      $("#main > section").remove();
-      $("#main").append(view.render());
+      $("#main").empty().append(view.render());
       return $('.datatable').dataTable({
         "bJQueryUI": true,
         "sPaginationType": "full_numbers",
@@ -8410,8 +8373,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     income: function() {
       var view;
       view = new App.IncomeTableView();
-      $("#main > section").remove();
-      $("#main").append(view.render());
+      $("#main").empty().append(view.render());
       return $('.datatable').dataTable({
         "bJQueryUI": true,
         "sPaginationType": "full_numbers",
@@ -8437,8 +8399,10 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
   });
 
   $(function() {
+    var stats;
     new App.ApplicationController();
-    new App.StatsView();
+    stats = new App.StatsView();
+    $(".content").prepend(stats.render());
     return Backbone.history.start();
   });
 

@@ -2,7 +2,7 @@ window.App.BudgetedSingleView = Backbone.View.extend
   tagName: 'tr'
   events: 
     'click span': 'activateForm'
-    'click .delete': 'remove'
+    'click .delete': 'destroy'
     'click .edit': 'edit'
     'click .update': 'update'
     'click .cancel': 'cancel'
@@ -18,21 +18,25 @@ window.App.BudgetedSingleView = Backbone.View.extend
     return @
 
   template: (data) ->
-    template = _.template($("#budgeted_single_template").text());
+    template = _.template($("#single_row_template").text());
     template(data);
   
   unrender: ->
     $(@el).remove()
   
-  remove: ->
+  destroy: ->
+    console.log("removing")
     @model.destroy()
   
   edit: ->
     $(this.el).addClass("editing")
   
   checkForSubmit: (e) ->
-    @update() if e.keyCode == 13
-    
+    if e.keyCode == 13
+      @update()
+    else if e.keyCode == 27
+      @stopEditing()
+
   stopEditing: ->
     $(this.el).removeClass("editing")
   

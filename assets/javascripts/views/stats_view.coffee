@@ -2,43 +2,41 @@
 
 window.App.StatsView = Backbone.View.extend
   tagName: 'section'
+  className: 'stats group'
 
   initialize: ->
-    _.bindAll(@, 'render', 'recalculateTotals')
+    _.bindAll(@, 'render', 'updateStats')
+    @stats = new App.Stats()
+    @stats.bind('change', this.render)
+    
     @budgetedExpenses = App.BudgetedExpenses
-    @budgetedExpenses.bind('add', @recalculateTotals)
-    @budgetedExpenses.bind('change', @recalculateTotals)
-    @budgetedExpenses.bind('remove', @recalculateTotals)
+    @budgetedExpenses.bind('add', @updateStats)
+    @budgetedExpenses.bind('change', @updateStats)
+    @budgetedExpenses.bind('remove', @updateStats)
 
     @incomes = App.Incomes
-    @incomes.bind('add', @recalculateTotals)
-    @incomes.bind('change', @recalculateTotals)
-    @incomes.bind('remove', @recalculateTotals)
-    @render()
+    @incomes.bind('add', @updateStats)
+    @incomes.bind('change', @updateStats)
+    @incomes.bind('remove', @updateStats)
 
   render: ->
     @budgetedExpenses.fetch()
     @incomes.fetch()
-    $(@el).addClass("stats").addClass("group").append(@template(
-      monthly_cash_flow: ""
-      spending: ""
-      income: ""
-    ))
-    $(".content").prepend($(@el))
-    @recalculateTotals()
-  
-  template: ->
-    template = _.template($("#stats_template").text());
-    template.apply(@, arguments);
+    @updateStats()
+    $(@el).html(@template(@stats.toJSON()))
+    @el
 
-  recalculateTotals: ->
-    cash_flow = @cash_flow()
-    spending = @spending()
-    income = @income()
-    $("#stats_cash_flow, #stats_spending, #stats_income").removeClass("green").removeClass("red")
-    $("#stats_cash_flow").html(cash_flow).addClass(@class_for_amount(cash_flow)).formatCurrency()
-    $("#stats_spending").html(spending).addClass(@class_for_amount(spending)).formatCurrency()
-    $("#stats_income").html(income).addClass(@class_for_amount(income)).formatCurrency()
+  template: ->
+    template = _.template($("#stats_template").text())
+    template.apply(@, arguments)
+
+  updateStats: ->
+    @stats.set(
+      cash_flow: @cash_flow()
+      spending: @spending()
+      income: @income()
+      savings: 0
+    )
 
   cash_flow: ->
     @income() + @spending()

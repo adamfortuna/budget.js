@@ -10,8 +10,7 @@ window.App.ApplicationController = Backbone.Router.extend
 
   budgeted: ->
     view = new App.BudgetedTableView()
-    $("#main > section").remove()
-    $("#main").append(view.render())
+    $("#main").empty().append(view.render())
     $('.datatable').dataTable(
       "bJQueryUI": true,
       "sPaginationType": "full_numbers",
@@ -20,8 +19,7 @@ window.App.ApplicationController = Backbone.Router.extend
   
   income: ->
     view = new App.IncomeTableView()
-    $("#main > section").remove()
-    $("#main").append(view.render())
+    $("#main").empty().append(view.render())
     $('.datatable').dataTable(
       "bJQueryUI": true,
       "sPaginationType": "full_numbers",
@@ -46,5 +44,6 @@ window.App.ApplicationController = Backbone.Router.extend
 
 $ ->
   new App.ApplicationController()
-  new App.StatsView()
+  stats = new App.StatsView()
+  $(".content").prepend(stats.render())
   Backbone.history.start()

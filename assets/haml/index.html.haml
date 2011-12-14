@@ -28,20 +28,19 @@
     #main
 
 
+
   %script{ type: "text/html", id: "budgeted_template" }
     %div{ class: "title" }
       %h5 Budgeted Expenses
-
     %div
-      %a{ href: '#budgeted', class: 'add right', id: 'add_budget_expense' } Add A Budgeted Expense
-
+      %a{ href: '#budgeted', class: 'right add_new' } Add A Budgeted Expense
     %section{ class: "widget table"}
       %div{ class: "head" }
         %h5{ class: "iFrames" }
           Budgeted Expenses
-      %table{ class: "display datatable", id: 'budgeted_expenses' }
+      %table{ class: 'display datatable' }
         %thead
-          %tr{ id: 'add_budgeted_expense_wrapper', style: 'display:none;'}
+          %tr{ class: 'new_row_template' }
             %td
               %input{ type: 'text', class: "description" }
             %td
@@ -53,7 +52,7 @@
                 %option{ value: "Monthly" } Monthly
                 %option{ value: "Yearly" } Yearly
             %td
-              %input{ type: 'submit', value: 'Add', id: 'add_budgeted_expense' }
+              %input{ type: 'submit', value: 'Add', class: 'create' }
               %a{ href: '#budgeted', class: "hide" } cancel
           %tr
             %th Description
@@ -62,8 +61,10 @@
             %th Timing
             %th Actions
         %tbody{ id: "budgeted_expenses_body" }
-        
-  %script{ type: "text/html", id: "budgeted_single_template" }
+
+
+
+  %script{ type: "text/html", id: "single_row_template" }
     %td
       %span <%= description %>
       <input type="text" class="description" value="<%= description %>" />
@@ -82,35 +83,37 @@
       %input{ type: 'submit', class: 'button update', value: 'Update' }
       %a{ href: '#budgeted', class: 'cancel' } cancel
 
+
+
   %script{ type: "text/html", id: "stats_template" }
     %ul
       %li
-        %span{ class: "count", id: "stats_cash_flow" }
+        %span{ class: "count", id: "stats_cash_flow" } <%= cash_flow %>
         %span cash flow
       %li
-        %span{ class: "count", id: "stats_spending" }
+        %span{ class: "count", id: "stats_spending" } <%= spending %>
         %span spending
       %li
-        %span{ class: "count", id: "stats_income" }
+        %span{ class: "count", id: "stats_income" } <%= income %>
         %span income
       %li
-        %span{ class: "count", id: "stats_savings" }
+        %span{ class: "count", id: "stats_savings" } <%= savings %>
         %span savings
-        
+
+
+
   %script{ type: "text/html", id: "income_template" }
     %div{ class: "title" }
       %h5 Income
-
     %div
-      %a{ href: '#income', class: 'add right', id: 'show_form' } Add 
-
+      %a{ href: '#income', class: 'add_new' } Add
     %section{ class: "widget table"}
       %div{ class: "head" }
         %h5{ class: "iFrames" }
           Income
       %table{ class: "display datatable", id: 'incomes' }
         %thead
-          %tr{ id: 'add_income_wrapper', style: 'display:none;'}
+          %tr{ class: 'new_row_template' }
             %td
               %input{ type: 'text', class: "description" }
             %td
@@ -122,7 +125,7 @@
                 %option{ value: "Monthly" } Monthly
                 %option{ value: "Yearly" } Yearly
             %td
-              %input{ type: 'submit', value: 'Add', id: 'add_income' }
+              %input{ type: 'submit', value: 'Add', class: 'create' }
               %a{ href: '#income', class: "hide" } cancel
           %tr
             %th Description
@@ -131,22 +134,3 @@
             %th Timing
             %th Actions
         %tbody{ id: "income_body" }
-
-  %script{ type: "text/html", id: "income_single_template" }
-    %td
-      %span <%= description %>
-      <input type="text" class="description" value="<%= description %>" />
-    %td
-      %span <%= payee %>
-      <input type="text" class="payee" value="<%= payee %>" />
-    %td
-      %span <%= amount %>
-      <input type="text" class="amount" value="<%= amount %>" />
-    %td
-      %span <%= timing %>
-      <input type="text" class="timing" value="<%= timing %>" />
-    %td
-      %a{ href: '#income', class: 'delete' } remove
-      %a{ href: '#income', class: 'edit' } edit
-      %input{ type: 'submit', class: 'button update', value: 'Update' }
-      %a{ href: '#income', class: 'cancel' } cancel

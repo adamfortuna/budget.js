@@ -1,4 +1,9 @@
 #budgeted_expenses_body tr.editing .delete, #budgeted_expenses_body tr.editing .edit { display:none; }
-#budgeted_expenses_body tr .update, #budgeted_expenses_body tr .cancel { display:none; }
-#budgeted_expenses_body tr.editing .update, #budgeted_expenses_body tr.editing .cancel { display: inline-block; }
 
+section table tr .update, section table tr .cancel,
+section table tr.editing .delete, section table tr.editing .edit { display: none; }
+section table tr.editing .update, section table tr.editing .cancel { display: inline-block; }
+
+
+section table thead tr.new_row_template { display: none; }
+section table.adding thead tr.new_row_template { display: table-row; }

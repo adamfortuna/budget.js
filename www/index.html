@@ -47,7 +47,7 @@
       <h5>Budgeted Expenses</h5>
     </div>
     <div>
-      <a class='add right' href='#budgeted' id='add_budget_expense'>Add A Budgeted Expense</a>
+      <a class='right add_new' href='#budgeted'>Add A Budgeted Expense</a>
     </div>
     <section class='widget table'>
       <div class='head'>
@@ -55,9 +55,9 @@
           Budgeted Expenses
         </h5>
       </div>
-      <table class='display datatable' id='budgeted_expenses'>
+      <table class='display datatable'>
         <thead>
-          <tr id='add_budgeted_expense_wrapper' style='display:none;'>
+          <tr class='new_row_template'>
             <td>
               <input class='description' type='text' />
             </td>
@@ -74,7 +74,7 @@
               </select>
             </td>
             <td>
-              <input id='add_budgeted_expense' type='submit' value='Add' />
+              <input class='create' type='submit' value='Add' />
               <a class='hide' href='#budgeted'>cancel</a>
             </td>
           </tr>
@@ -90,7 +90,7 @@
       </table>
     </section>
   </script>
-  <script id='budgeted_single_template' type='text/html'>
+  <script id='single_row_template' type='text/html'>
     <td>
       <span><%= description %></span>
       <input type="text" class="description" value="<%= description %>" />
@@ -117,19 +117,19 @@
   <script id='stats_template' type='text/html'>
     <ul>
       <li>
-        <span class='count' id='stats_cash_flow'></span>
+        <span class='count' id='stats_cash_flow'><%= cash_flow %></span>
         <span>cash flow</span>
       </li>
       <li>
-        <span class='count' id='stats_spending'></span>
+        <span class='count' id='stats_spending'><%= spending %></span>
         <span>spending</span>
       </li>
       <li>
-        <span class='count' id='stats_income'></span>
+        <span class='count' id='stats_income'><%= income %></span>
         <span>income</span>
       </li>
       <li>
-        <span class='count' id='stats_savings'></span>
+        <span class='count' id='stats_savings'><%= savings %></span>
         <span>savings</span>
       </li>
     </ul>
@@ -139,7 +139,7 @@
       <h5>Income</h5>
     </div>
     <div>
-      <a class='add right' href='#income' id='show_form'>Add</a>
+      <a class='add_new' href='#income'>Add</a>
     </div>
     <section class='widget table'>
       <div class='head'>
@@ -149,7 +149,7 @@
       </div>
       <table class='display datatable' id='incomes'>
         <thead>
-          <tr id='add_income_wrapper' style='display:none;'>
+          <tr class='new_row_template'>
             <td>
               <input class='description' type='text' />
             </td>
@@ -166,7 +166,7 @@
               </select>
             </td>
             <td>
-              <input id='add_income' type='submit' value='Add' />
+              <input class='create' type='submit' value='Add' />
               <a class='hide' href='#income'>cancel</a>
             </td>
           </tr>
@@ -181,29 +181,5 @@
         <tbody id='income_body'></tbody>
       </table>
     </section>
-  </script>
-  <script id='income_single_template' type='text/html'>
-    <td>
-      <span><%= description %></span>
-      <input type="text" class="description" value="<%= description %>" />
-    </td>
-    <td>
-      <span><%= payee %></span>
-      <input type="text" class="payee" value="<%= payee %>" />
-    </td>
-    <td>
-      <span><%= amount %></span>
-      <input type="text" class="amount" value="<%= amount %>" />
-    </td>
-    <td>
-      <span><%= timing %></span>
-      <input type="text" class="timing" value="<%= timing %>" />
-    </td>
-    <td>
-      <a class='delete' href='#income'>remove</a>
-      <a class='edit' href='#income'>edit</a>
-      <input class='button update' type='submit' value='Update' />
-      <a class='cancel' href='#income'>cancel</a>
-    </td>
   </script>
 </body>
