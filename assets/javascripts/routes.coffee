@@ -11,11 +11,11 @@ window.App.ApplicationController = Backbone.Router.extend
   budgeted: ->
     view = new App.BudgetedTableView()
     $("#main").empty().append(view.render())
-    $('.datatable').dataTable(
-      "bJQueryUI": true,
-      "sPaginationType": "full_numbers",
-      "sDom": '<""f>t<"F"lp>'
-    )
+    # $('.datatable').dataTable(
+    #       "bJQueryUI": true,
+    #       "sPaginationType": "full_numbers",
+    #       "sDom": '<""f>t<"F"lp>'
+    #     )
   
   income: ->
     view = new App.IncomeTableView()

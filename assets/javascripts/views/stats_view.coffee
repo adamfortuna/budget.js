@@ -10,20 +10,21 @@ window.App.StatsView = Backbone.View.extend
     @stats.bind('change', this.render)
     
     @budgetedExpenses = App.BudgetedExpenses
+    @budgetedExpenses.fetch()
     @budgetedExpenses.bind('add', @updateStats)
     @budgetedExpenses.bind('change', @updateStats)
     @budgetedExpenses.bind('remove', @updateStats)
 
     @incomes = App.Incomes
+    @incomes.fetch()
     @incomes.bind('add', @updateStats)
     @incomes.bind('change', @updateStats)
     @incomes.bind('remove', @updateStats)
 
   render: ->
-    @budgetedExpenses.fetch()
-    @incomes.fetch()
     @updateStats()
     $(@el).html(@template(@stats.toJSON()))
+    $(@el).find('.currency').formatCurrency()
     @el
 
   template: ->
@@ -32,27 +33,31 @@ window.App.StatsView = Backbone.View.extend
 
   updateStats: ->
     @stats.set(
-      cash_flow: @cash_flow()
+      cashFlow: @cashFlow()
       spending: @spending()
       income: @income()
-      savings: 0
+      savings: 8 
     )
 
-  cash_flow: ->
+  cashFlow: ->
     @income() + @spending()
   
   spending: ->
-    _.reduce(@budgetedExpenses.models, (sum, budgeted_expense) ->
-      parseFloat(budgeted_expense.toJSON().amount) + sum
-    , 0) * -1
+    @total_for(@budgetedExpenses.models) * -1
 
   income: ->
-    _.reduce(@incomes.models, (sum, income) ->
-      parseFloat(income.toJSON().amount) + sum
-    , 0)
-    
+    @total_for(@incomes.models)
+
   class_for_amount: (amount) ->
     if amount >= 0
       "green"
     else
       "red"
+
+  total_for: (collection) ->
+    _.reduce(collection, (sum, budgeted_expense) ->
+      num = parseFloat(budgeted_expense.toJSON().amount)
+      if(isNaN(num))
+        num = 0
+      num + sum
+    , 0)

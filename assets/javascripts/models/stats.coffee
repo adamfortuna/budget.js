@@ -1,3 +1,6 @@
 window.App.Stats = Backbone.Model.extend
-  amount: ->
-    0
+  defaults:
+    "cashFlow": 0
+    "spending": 0
+    "income": 0
+    "savings": 0

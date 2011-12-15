@@ -7,16 +7,18 @@ window.App.TableView = Backbone.View.extend
     'keyup .new_row_template input': 'checkForSubmit'
 
   initialize: ->
-    _.bindAll(@, 'render', 'create', 'addItem')
+    _.bindAll(@, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error')
     @collection = @collectionClass
     @collection.fetch()
-    @collection.bind('add', @addItem)
+    @collection.bind('add', @appendItemAndResort)
+    @collection.bind('remove', @resort)
 
   render: ->
     $(@el).append(@template())
     _(@collection.models).each ((item) ->
-      @addItem item
+      @appendItem item
     ), @
+    @resort()
     @el
 
   template: ->
@@ -29,7 +31,11 @@ window.App.TableView = Backbone.View.extend
     else if e.keyCode == 27
       @hideForm()
 
-  addItem: (item) ->
+  appendItemAndResort: (item) ->
+    @appendItem item
+    @resort()
+
+  appendItem: (item) ->
     newItem = new @rowClass(model: item)
     $(@el).find("tbody").prepend(newItem.render().el)
 
@@ -45,11 +51,27 @@ window.App.TableView = Backbone.View.extend
     
   create: ->
     form = $(@el).find(".new_row_template")
-    @collection.create(
+    item = new @modelClass(
       description: form.find(".description").val()
       payee: form.find(".payee").val()
       amount: form.find(".amount").val()
       timing: form.find(".timing").val()
     )
-    @clearForm()
-    form.find(".description").focus()
+    item.bind('error', @error)
+    
+    if @collection.create(item)
+      console.log('created')
+      @clearForm()
+      form.find(".description").focus()
+  
+  resort: ->
+    $(@el).find('.datatable').dataTable(
+      "bJQueryUI": true,
+      "sPaginationType": "full_numbers",
+      "sDom": '<""f>t<"F"lp>'
+    )
+
+  error: (model, errors) ->
+    console.log('error occured')
+    for error in errors
+      console.log("#{error.field} #{error.message}")

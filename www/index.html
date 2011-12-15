@@ -43,9 +43,6 @@
     <div id='main'></div>
   </div>
   <script id='budgeted_template' type='text/html'>
-    <div class='title'>
-      <h5>Budgeted Expenses</h5>
-    </div>
     <div>
       <a class='right add_new' href='#budgeted'>Add A Budgeted Expense</a>
     </div>
@@ -92,19 +89,19 @@
   </script>
   <script id='single_row_template' type='text/html'>
     <td>
-      <span><%= description %></span>
+      <span class='editable'><%= description %></span>
       <input type="text" class="description" value="<%= description %>" />
     </td>
     <td>
-      <span><%= payee %></span>
+      <span class='editable'><%= payee %></span>
       <input type="text" class="payee" value="<%= payee %>" />
     </td>
     <td>
-      <span><%= amount %></span>
+      <span class='editable currency'><%= amount %></span>
       <input type="text" class="amount" value="<%= amount %>" />
     </td>
     <td>
-      <span><%= timing %></span>
+      <span class='editable'><%= timing %></span>
       <input type="text" class="timing" value="<%= timing %>" />
     </td>
     <td>
@@ -117,27 +114,24 @@
   <script id='stats_template' type='text/html'>
     <ul>
       <li>
-        <span class='count' id='stats_cash_flow'><%= cash_flow %></span>
+        <span class='count currency' id='stats_cash_flow'><%= cashFlow %></span>
         <span>cash flow</span>
       </li>
       <li>
-        <span class='count' id='stats_spending'><%= spending %></span>
+        <span class='count currency' id='stats_spending'><%= spending %></span>
         <span>spending</span>
       </li>
       <li>
-        <span class='count' id='stats_income'><%= income %></span>
+        <span class='count currency' id='stats_income'><%= income %></span>
         <span>income</span>
       </li>
       <li>
-        <span class='count' id='stats_savings'><%= savings %></span>
+        <span class='count currency' id='stats_savings'><%= savings %></span>
         <span>savings</span>
       </li>
     </ul>
   </script>
   <script id='income_template' type='text/html'>
-    <div class='title'>
-      <h5>Income</h5>
-    </div>
     <div>
       <a class='add_new' href='#income'>Add</a>
     </div>

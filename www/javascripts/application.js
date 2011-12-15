@@ -8055,16 +8055,56 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
   window.App = {};
 
   window.App.Expense = Backbone.Model.extend({
+    defaults: {
+      'amount': 0,
+      'description': null,
+      'payee': null,
+      'timing': 'Monthly'
+    },
     weekly_amount: function() {
       return this.amount * 12 / 52;
     },
     daily_amount: function() {
       return this.amount * 12 / 365;
+    },
+    validate: function(attributes) {
+      var errors;
+      errors = [];
+      if (!attributes.amount || attributes.amount.length === 0) {
+        errors.push({
+          'field': 'amount',
+          'message': 'cannot be empty'
+        });
+      } else if (isNaN(attributes.amount)) {
+        errors.push({
+          'field': 'amount',
+          'message': 'must be a number'
+        });
+      }
+      if (!attributes.description || attributes.description.length === 0) {
+        errors.push({
+          'field': 'description',
+          'message': 'cannot be empty'
+        });
+      }
+      if (!attributes.payee || attributes.payee.length === 0) {
+        errors.push({
+          'field': 'payee',
+          'message': 'cannot be empty'
+        });
+      }
+      if (!attributes.timing || attributes.timing.length === 0) {
+        errors.push({
+          'field': 'timing',
+          'message': 'cannot be empty'
+        });
+      }
+      if (errors.length > 0) return errors;
     }
   });
 
   window.App.BudgetedExpense = window.App.Expense.extend({
-    initialize: function() {}
+    sdfsdfgs: function() {}
   });
 
   window.App.Income = Backbone.Model.extend({
@@ -8073,12 +8113,49 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     },
     daily_amount: function() {
       return this.amount * 12 / 365;
+    },
+    validate: function(attributes) {
+      var errors;
+      errors = [];
+      if (!attributes.amount || attributes.amount.length === 0) {
+        errors.push({
+          'field': 'amount',
+          'message': 'cannot be empty'
+        });
+      } else if (isNaN(attributes.amount)) {
+        errors.push({
+          'field': 'amount',
+          'message': 'must be a number'
+        });
+      }
+      if (!attributes.description || attributes.description.length === 0) {
+        errors.push({
+          'field': 'description',
+          'message': 'cannot be empty'
+        });
+      }
+      if (!attributes.payee || attributes.payee.length === 0) {
+        errors.push({
+          'field': 'payee',
+          'message': 'cannot be empty'
+        });
+      }
+      if (!attributes.timing || attributes.timing.length === 0) {
+        errors.push({
+          'field': 'timing',
+          'message': 'cannot be empty'
+        });
+      }
+      if (errors.length > 0) return errors;
     }
   });
 
   window.App.Stats = Backbone.Model.extend({
-    amount: function() {
-      return 0;
+    defaults: {
+      "cashFlow": 0,
+      "spending": 0,
+      "income": 0,
+      "savings": 0
     }
   });
 
@@ -8087,14 +8164,84 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     model: App.BudgetedExpense
   });
 
-  window.App.BudgetedExpenses = new App.BudgetedExpenseList;
+  window.App.BudgetedExpenses = new App.BudgetedExpenseList();
 
   window.App.IncomeList = Backbone.Collection.extend({
     localStorage: new Store('income_list'),
     model: App.Income
   });
 
-  window.App.Incomes = new App.IncomeList;
+  window.App.Incomes = new App.IncomeList();
+
+  window.App.SingleView = Backbone.View.extend({
+    tagName: 'tr',
+    events: {
+      'click td span': 'edit',
+      'click .delete': 'destroy',
+      'click .edit': 'edit',
+      'click .update': 'update',
+      'click .cancel': 'cancel',
+      'keyup input': 'checkForSubmit'
+    },
+    initialize: function() {
+      _.bindAll(this, 'render', 'unrender', 'destroy', 'edit', 'update', 'stopEditing', 'cancel', 'checkForSubmit', 'error');
+      this.model.bind('change', this.render);
+      this.model.bind('remove', this.unrender);
+      return this.model.bind('error', this.error);
+    },
+    render: function() {
+      $(this.el).html(this.template(this.model.toJSON()));
+      $(this.el).find('.currency').formatCurrency();
+      return this;
+    },
+    template: function(data) {
+      var template;
+      template = _.template($(this.templateElement).text());
+      return template(data);
+    },
+    unrender: function() {
+      return $(this.el).remove();
+    },
+    destroy: function() {
+      return this.model.destroy();
+    },
+    edit: function() {
+      $(this.el).parents("table").find('tbody tr').removeClass("editing");
+      return $(this.el).addClass("editing");
+    },
+    checkForSubmit: function(e) {
+      if (e.keyCode === 13) {
+        return this.update();
+      } else if (e.keyCode === 27) {
+        return this.stopEditing();
+      }
+    },
+    stopEditing: function() {
+      return $(this.el).removeClass("editing");
+    },
+    update: function() {
+      if (this.model.set({
+        amount: $(this.el).find(".amount").val(),
+        description: $(this.el).find(".description").val(),
+        payee: $(this.el).find(".payee").val(),
+        timing: $(this.el).find(".timing").val()
+      })) {
+        return this.stopEditing();
+      }
+    },
+    cancel: function() {
+      return this.stopEditing();
+    },
+    error: function(model, errors) {
+      var error, _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = errors.length; _i < _len; _i++) {
+        error = errors[_i];
+        _results.push(console.log("" + error.field + " " + error.message));
+      }
+      return _results;
+    }
+  });
 
   window.App.TableView = Backbone.View.extend({
     tagName: 'section',
@@ -8105,16 +8252,18 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       'keyup .new_row_template input': 'checkForSubmit'
     },
     initialize: function() {
-      _.bindAll(this, 'render', 'create', 'addItem');
+      _.bindAll(this, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error');
       this.collection = this.collectionClass;
       this.collection.fetch();
-      return this.collection.bind('add', this.addItem);
+      this.collection.bind('add', this.appendItemAndResort);
+      return this.collection.bind('remove', this.resort);
     },
     render: function() {
       $(this.el).append(this.template());
       _(this.collection.models).each((function(item) {
-        return this.addItem(item);
+        return this.appendItem(item);
       }), this);
+      this.resort();
       return this.el;
     },
     template: function() {
@@ -8129,7 +8278,11 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
         return this.hideForm();
       }
     },
-    addItem: function(item) {
+    appendItemAndResort: function(item) {
+      this.appendItem(item);
+      return this.resort();
+    },
+    appendItem: function(item) {
       var newItem;
       newItem = new this.rowClass({
         model: item
@@ -8147,148 +8300,59 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return $(this.el).find("table").removeClass("adding");
     },
     create: function() {
-      var form;
+      var form, item;
       form = $(this.el).find(".new_row_template");
-      this.collection.create({
+      item = new this.modelClass({
         description: form.find(".description").val(),
         payee: form.find(".payee").val(),
         amount: form.find(".amount").val(),
         timing: form.find(".timing").val()
       });
-      this.clearForm();
-      return form.find(".description").focus();
+      item.bind('error', this.error);
+      if (this.collection.create(item)) {
+        console.log('created');
+        this.clearForm();
+        return form.find(".description").focus();
+      }
+    },
+    resort: function() {
+      return $(this.el).find('.datatable').dataTable({
+        "bJQueryUI": true,
+        "sPaginationType": "full_numbers",
+        "sDom": '<""f>t<"F"lp>'
+      });
+    },
+    error: function(model, errors) {
+      var error, _i, _len, _results;
+      console.log('error occured');
+      _results = [];
+      for (_i = 0, _len = errors.length; _i < _len; _i++) {
+        error = errors[_i];
+        _results.push(console.log("" + error.field + " " + error.message));
+      }
+      return _results;
     }
   });
 
-  window.App.BudgetedSingleView = Backbone.View.extend({
-    tagName: 'tr',
-    events: {
-      'click span': 'activateForm',
-      'click .delete': 'destroy',
-      'click .edit': 'edit',
-      'click .update': 'update',
-      'click .cancel': 'cancel',
-      'keyup input': 'checkForSubmit'
-    },
-    initialize: function() {
-      _.bindAll(this, 'render', 'unrender', 'remove');
-      this.model.bind('change', this.render);
-      return this.model.bind('remove', this.unrender);
-    },
-    render: function() {
-      $(this.el).html(this.template(this.model.toJSON()));
-      return this;
-    },
-    template: function(data) {
-      var template;
-      template = _.template($("#single_row_template").text());
-      return template(data);
-    },
-    unrender: function() {
-      return $(this.el).remove();
-    },
-    destroy: function() {
-      console.log("removing");
-      return this.model.destroy();
-    },
-    edit: function() {
-      return $(this.el).addClass("editing");
-    },
-    checkForSubmit: function(e) {
-      if (e.keyCode === 13) {
-        return this.update();
-      } else if (e.keyCode === 27) {
-        return this.stopEditing();
-      }
-    },
-    stopEditing: function() {
-      return $(this.el).removeClass("editing");
-    },
-    update: function() {
-      this.model.set({
-        amount: $(this.el).find(".amount").val(),
-        description: $(this.el).find(".description").val(),
-        payee: $(this.el).find(".payee").val(),
-        timing: $(this.el).find(".timing").val()
-      });
-      return this.stopEditing();
-    },
-    cancel: function() {
-      return this.stopEditing();
-    },
-    activateForm: function() {
-      console.log("testing");
-      return $(this.el).addClass("editing");
-    }
+  window.App.BudgetedSingleView = App.SingleView.extend({
+    templateElement: "#single_row_template"
   });
 
   window.App.BudgetedTableView = App.TableView.extend({
     collectionClass: App.BudgetedExpenses,
     rowClass: App.BudgetedSingleView,
+    modelClass: App.BudgetedExpense,
     templateElement: "#budgeted_template"
   });
 
-  window.App.IncomeSingleView = Backbone.View.extend({
-    tagName: 'tr',
-    events: {
-      'click span': 'activateForm',
-      'click .delete': 'remove',
-      'click .edit': 'edit',
-      'click .update': 'update',
-      'click .cancel': 'cancel',
-      'keyup input': 'checkForSubmit'
-    },
-    initialize: function() {
-      _.bindAll(this, 'render', 'unrender', 'remove');
-      this.model.bind('change', this.render);
-      return this.model.bind('remove', this.unrender);
-    },
-    render: function() {
-      $(this.el).html(this.template(this.model.toJSON()));
-      return this;
-    },
-    template: function(data) {
-      var template;
-      template = _.template($("#single_row_template").text());
-      return template(data);
-    },
-    unrender: function() {
-      return $(this.el).remove();
-    },
-    remove: function() {
-      console.log("incomesingle view delete");
-      return this.model.destroy();
-    },
-    edit: function() {
-      return $(this.el).addClass("editing");
-    },
-    checkForSubmit: function(e) {
-      if (e.keyCode === 13) return this.update();
-    },
-    stopEditing: function() {
-      return $(this.el).removeClass("editing");
-    },
-    update: function() {
-      this.model.set({
-        amount: $(this.el).find(".amount").val(),
-        description: $(this.el).find(".description").val(),
-        payee: $(this.el).find(".payee").val(),
-        timing: $(this.el).find(".timing").val()
-      });
-      return this.stopEditing();
-    },
-    cancel: function() {
-      return this.stopEditing();
-    },
-    activateForm: function() {
-      console.log("testing");
-      return $(this.el).addClass("editing");
-    }
+  window.App.IncomeSingleView = App.SingleView.extend({
+    templateElement: "#single_row_template"
   });
 
   window.App.IncomeTableView = App.TableView.extend({
     collectionClass: App.Incomes,
     rowClass: App.IncomeSingleView,
+    modelClass: App.Income,
     templateElement: "#income_template"
   });
 
@@ -8300,19 +8364,20 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       this.stats = new App.Stats();
       this.stats.bind('change', this.render);
       this.budgetedExpenses = App.BudgetedExpenses;
+      this.budgetedExpenses.fetch();
       this.budgetedExpenses.bind('add', this.updateStats);
       this.budgetedExpenses.bind('change', this.updateStats);
       this.budgetedExpenses.bind('remove', this.updateStats);
       this.incomes = App.Incomes;
+      this.incomes.fetch();
       this.incomes.bind('add', this.updateStats);
       this.incomes.bind('change', this.updateStats);
       return this.incomes.bind('remove', this.updateStats);
     },
     render: function() {
-      this.budgetedExpenses.fetch();
-      this.incomes.fetch();
       this.updateStats();
       $(this.el).html(this.template(this.stats.toJSON()));
+      $(this.el).find('.currency').formatCurrency();
       return this.el;
     },
     template: function() {
@@ -8322,24 +8387,20 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     },
     updateStats: function() {
       return this.stats.set({
-        cash_flow: this.cash_flow(),
+        cashFlow: this.cashFlow(),
         spending: this.spending(),
         income: this.income(),
-        savings: 0
+        savings: 8
       });
     },
-    cash_flow: function() {
+    cashFlow: function() {
       return this.income() + this.spending();
     },
     spending: function() {
-      return _.reduce(this.budgetedExpenses.models, function(sum, budgeted_expense) {
-        return parseFloat(budgeted_expense.toJSON().amount) + sum;
-      }, 0) * -1;
+      return this.total_for(this.budgetedExpenses.models) * -1;
     },
     income: function() {
-      return _.reduce(this.incomes.models, function(sum, income) {
-        return parseFloat(income.toJSON().amount) + sum;
-      }, 0);
+      return this.total_for(this.incomes.models);
     },
     class_for_amount: function(amount) {
       if (amount >= 0) {
@@ -8347,6 +8408,14 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       } else {
         return "red";
       }
+    },
+    total_for: function(collection) {
+      return _.reduce(collection, function(sum, budgeted_expense) {
+        var num;
+        num = parseFloat(budgeted_expense.toJSON().amount);
+        if (isNaN(num)) num = 0;
+        return num + sum;
+      }, 0);
     }
   });
 
@@ -8363,12 +8432,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     budgeted: function() {
       var view;
       view = new App.BudgetedTableView();
-      $("#main").empty().append(view.render());
-      return $('.datatable').dataTable({
-        "bJQueryUI": true,
-        "sPaginationType": "full_numbers",
-        "sDom": '<""f>t<"F"lp>'
-      });
+      return $("#main").empty().append(view.render());
     },
     income: function() {
       var view;

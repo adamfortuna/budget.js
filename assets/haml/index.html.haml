@@ -30,8 +30,6 @@
 
 
   %script{ type: "text/html", id: "budgeted_template" }
-    %div{ class: "title" }
-      %h5 Budgeted Expenses
     %div
       %a{ href: '#budgeted', class: 'right add_new' } Add A Budgeted Expense
     %section{ class: "widget table"}
@@ -66,16 +64,16 @@
 
   %script{ type: "text/html", id: "single_row_template" }
     %td
-      %span <%= description %>
+      %span{ class: 'editable' } <%= description %>
       <input type="text" class="description" value="<%= description %>" />
     %td
-      %span <%= payee %>
+      %span{ class: 'editable' } <%= payee %>
       <input type="text" class="payee" value="<%= payee %>" />
     %td
-      %span <%= amount %>
+      %span{ class: 'editable currency' } <%= amount %>
       <input type="text" class="amount" value="<%= amount %>" />
     %td
-      %span <%= timing %>
+      %span{ class: 'editable' } <%= timing %>
       <input type="text" class="timing" value="<%= timing %>" />
     %td
       %a{ href: '#budgeted', class: 'delete' } remove
@@ -88,23 +86,21 @@
   %script{ type: "text/html", id: "stats_template" }
     %ul
       %li
-        %span{ class: "count", id: "stats_cash_flow" } <%= cash_flow %>
+        %span{ class: "count currency", id: "stats_cash_flow" } <%= cashFlow %>
         %span cash flow
       %li
-        %span{ class: "count", id: "stats_spending" } <%= spending %>
+        %span{ class: "count currency", id: "stats_spending" } <%= spending %>
         %span spending
       %li
-        %span{ class: "count", id: "stats_income" } <%= income %>
+        %span{ class: "count currency", id: "stats_income" } <%= income %>
         %span income
       %li
-        %span{ class: "count", id: "stats_savings" } <%= savings %>
+        %span{ class: "count currency", id: "stats_savings" } <%= savings %>
         %span savings
 
 
 
   %script{ type: "text/html", id: "income_template" }
-    %div{ class: "title" }
-      %h5 Income
     %div
       %a{ href: '#income', class: 'add_new' } Add
     %section{ class: "widget table"}

@@ -88,7 +88,7 @@ section.widget .inactive h5, section.widget .accordion-open h5 { background: url
 
 section table.datatable td input[type=text], section table td span { font-size: 18px; border: 1px solid transparent; padding: 3px; }
 section table.datatable td input[type=text] { border: 1px solid #CCC; width: 97%; }
-section table.datatable td span { margin-bottom: 1px; display: inline-block; }
+section table.datatable td span.editable { margin-bottom: 1px; display: block; cursor: text; }
 
 section table.datatable tbody tr input { display:none; border: none; border: 1px solid transparent; background-color: transparent; cursor: default; }
 section table.datatable tbody tr.editing span { display: none; }
