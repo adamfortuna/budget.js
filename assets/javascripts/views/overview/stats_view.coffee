@@ -11,15 +11,9 @@ window.App.StatsView = Backbone.View.extend
     
     @budgetedExpenses = App.BudgetedExpenses
     @budgetedExpenses.fetch()
-    @budgetedExpenses.bind('add', @updateStats)
-    @budgetedExpenses.bind('change', @updateStats)
-    @budgetedExpenses.bind('remove', @updateStats)
 
     @incomes = App.Incomes
     @incomes.fetch()
-    @incomes.bind('add', @updateStats)
-    @incomes.bind('change', @updateStats)
-    @incomes.bind('remove', @updateStats)
 
   render: ->
     @updateStats()

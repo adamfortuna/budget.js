@@ -1,6 +1,6 @@
 window.App.ApplicationController = Backbone.Router.extend
   routes:
-    '': 'budgeted'
+    '': 'overview'
     'overview': 'overview'
     'savings': 'savings'
     'budgeted': 'budgeted'
@@ -8,29 +8,21 @@ window.App.ApplicationController = Backbone.Router.extend
     'history': 'history'
     'income': 'income'
 
-  budgeted: ->
-    view = new App.BudgetedTableView()
-    $("#main").empty().append(view.render())
-    # $('.datatable').dataTable(
-    #       "bJQueryUI": true,
-    #       "sPaginationType": "full_numbers",
-    #       "sDom": '<""f>t<"F"lp>'
-    #     )
-  
+  overview: ->
+    stats = new App.StatsView()
+    $("#main").empty().append(stats.render())
+
   income: ->
     view = new App.IncomeTableView()
     $("#main").empty().append(view.render())
-    $('.datatable').dataTable(
-      "bJQueryUI": true,
-      "sPaginationType": "full_numbers",
-      "sDom": '<""f>t<"F"lp>'
-    )
 
-  overview: ->
-    @tab('overview', 'overview')
+  budgeted: ->
+    view = new App.BudgetedTableView()
+    $("#main").empty().append(view.render())
   
   savings: ->
-    @tab('savings', 'savings')
+    savings = new App.SavingTableView()
+    $("#main").empty().append(savings.render())
 
   expenses: ->
     @tab('expenses', 'expenses')
@@ -44,6 +36,4 @@ window.App.ApplicationController = Backbone.Router.extend
 
 $ ->
   new App.ApplicationController()
-  stats = new App.StatsView()
-  $(".content").prepend(stats.render())
   Backbone.history.start()

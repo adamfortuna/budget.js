@@ -10,9 +10,9 @@ window.App.SingleView = Backbone.View.extend
 
   initialize: ->
     _.bindAll(this, 'render', 'unrender', 'destroy', 'edit', 'update', 'stopEditing', 'cancel', 'checkForSubmit', 'error')
-    @model.bind('change', this.render)
-    @model.bind('remove', this.unrender)
-    @model.bind('error', this.error)
+    @model.bind('change', @render)
+    @model.bind('remove', @unrender)
+    @model.bind('error', @error)
 
   render: ->
     $(@el).html(@template(@model.toJSON()))
@@ -30,8 +30,8 @@ window.App.SingleView = Backbone.View.extend
     @model.destroy()
   
   edit: ->
-    $(this.el).parents("table").find('tbody tr').removeClass("editing")
-    $(this.el).addClass("editing")
+    $(@el).parents("table").find('tbody tr').removeClass("editing")
+    $(@el).addClass("editing")
   
   checkForSubmit: (e) ->
     if e.keyCode == 13
@@ -40,14 +40,14 @@ window.App.SingleView = Backbone.View.extend
       @stopEditing()
 
   stopEditing: ->
-    $(this.el).removeClass("editing")
+    $(@el).removeClass("editing").find(".error").removeClass(".error")
   
   update: ->
     if @model.set(
-      amount: $(this.el).find(".amount").val()
-      description: $(this.el).find(".description").val()
-      payee: $(this.el).find(".payee").val()
-      timing: $(this.el).find(".timing").val()
+      amount: $(@el).find(".amount").val()
+      description: $(@el).find(".description").val()
+      payee: $(@el).find(".payee").val()
+      timing: $(@el).find(".timing").val()
     )
       @stopEditing()
 
@@ -55,5 +55,6 @@ window.App.SingleView = Backbone.View.extend
     @stopEditing()
   
   error: (model, errors) ->
+    $(@el).find(".error").removeClass("error")
     for error in errors
-      console.log("#{error.field} #{error.message}")
+      $(@el).find(".#{error.field}").addClass("error")

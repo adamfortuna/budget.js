@@ -7,7 +7,7 @@ window.App.TableView = Backbone.View.extend
     'keyup .new_row_template input': 'checkForSubmit'
 
   initialize: ->
-    _.bindAll(@, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error')
+    _.bindAll(@, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error', 'parseAttributes')
     @collection = @collectionClass
     @collection.fetch()
     @collection.bind('add', @appendItemAndResort)
@@ -40,6 +40,7 @@ window.App.TableView = Backbone.View.extend
     $(@el).find("tbody").prepend(newItem.render().el)
 
   clearForm: ->
+    $(@el).find(".new_row_template").find(".error").removeClass("error")
     $(@el).find("thead input[type='text']").val("")
 
   showForm: ->
@@ -48,30 +49,39 @@ window.App.TableView = Backbone.View.extend
   hideForm: ->
     @clearForm()
     $(@el).find("table").removeClass("adding")
-    
+  
+  parseAttributes: ->
+    form = $(@el).find(".new_row_template")
+      
+    description: form.find(".description").val()
+    payee: form.find(".payee").val()
+    amount: form.find(".amount").val()
+    timing: form.find(".timing").val()
+
   create: ->
     form = $(@el).find(".new_row_template")
-    item = new @modelClass(
-      description: form.find(".description").val()
-      payee: form.find(".payee").val()
-      amount: form.find(".amount").val()
-      timing: form.find(".timing").val()
-    )
-    item.bind('error', @error)
+    item = new @modelClass()
+    attributes = @parseAttributes()
+    errors = item.validate(attributes)
     
-    if @collection.create(item)
-      console.log('created')
+    if errors && errors.length > 0
+      console.log("errors")
+      @error(errors)
+    else
+      @collection.create(attributes)
+      console.log('collection created')
       @clearForm()
       form.find(".description").focus()
   
   resort: ->
-    $(@el).find('.datatable').dataTable(
-      "bJQueryUI": true,
-      "sPaginationType": "full_numbers",
-      "sDom": '<""f>t<"F"lp>'
-    )
+    # $(@el).find('.datatable').dataTable(
+    #   "bJQueryUI": true,
+    #   "sPaginationType": "full_numbers",
+    #   "sDom": '<""f>t<"F"lp>'
+    # )
+    
 
-  error: (model, errors) ->
-    console.log('error occured')
+  error: (errors) ->
+    $(@el).find(".new_row_template .error").removeClass("error")
     for error in errors
-      console.log("#{error.field} #{error.message}")
+      $(@el).find(".new_row_template .#{error.field}").addClass("error")

@@ -8150,6 +8150,43 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
+  window.App.Saving = Backbone.Model.extend({
+    weekly_amount: function() {
+      return this.amount * 12 / 52;
+    },
+    daily_amount: function() {
+      return this.amount * 12 / 365;
+    },
+    validate: function(attributes) {
+      var errors;
+      errors = [];
+      if (!attributes.amount || attributes.amount.length === 0) {
+        errors.push({
+          'field': 'amount',
+          'message': 'cannot be empty'
+        });
+      } else if (isNaN(attributes.amount)) {
+        errors.push({
+          'field': 'amount',
+          'message': 'must be a number'
+        });
+      }
+      if (!attributes.description || attributes.description.length === 0) {
+        errors.push({
+          'field': 'description',
+          'message': 'cannot be empty'
+        });
+      }
+      if (!attributes.timing || attributes.timing.length === 0) {
+        errors.push({
+          'field': 'timing',
+          'message': 'cannot be empty'
+        });
+      }
+      if (errors.length > 0) return errors;
+    }
+  });
+
   window.App.Stats = Backbone.Model.extend({
     defaults: {
       "cashFlow": 0,
@@ -8172,6 +8209,13 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
   });
 
   window.App.Incomes = new App.IncomeList();
+
+  window.App.SavingsList = Backbone.Collection.extend({
+    localStorage: new Store('savings_list'),
+    model: App.Saving
+  });
+
+  window.App.Savings = new App.SavingsList();
 
   window.App.SingleView = Backbone.View.extend({
     tagName: 'tr',
@@ -8217,7 +8261,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       }
     },
     stopEditing: function() {
-      return $(this.el).removeClass("editing");
+      return $(this.el).removeClass("editing").find(".error").removeClass(".error");
     },
     update: function() {
       if (this.model.set({
@@ -8234,10 +8278,11 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     },
     error: function(model, errors) {
       var error, _i, _len, _results;
+      $(this.el).find(".error").removeClass("error");
       _results = [];
       for (_i = 0, _len = errors.length; _i < _len; _i++) {
         error = errors[_i];
-        _results.push(console.log("" + error.field + " " + error.message));
+        _results.push($(this.el).find("." + error.field).addClass("error"));
       }
       return _results;
     }
@@ -8252,7 +8297,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       'keyup .new_row_template input': 'checkForSubmit'
     },
     initialize: function() {
-      _.bindAll(this, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error');
+      _.bindAll(this, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error', 'parseAttributes');
       this.collection = this.collectionClass;
       this.collection.fetch();
       this.collection.bind('add', this.appendItemAndResort);
@@ -8290,6 +8335,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return $(this.el).find("tbody").prepend(newItem.render().el);
     },
     clearForm: function() {
+      $(this.el).find(".new_row_template").find(".error").removeClass("error");
       return $(this.el).find("thead input[type='text']").val("");
     },
     showForm: function() {
@@ -8299,36 +8345,40 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       this.clearForm();
       return $(this.el).find("table").removeClass("adding");
     },
-    create: function() {
-      var form, item;
+    parseAttributes: function() {
+      var form;
       form = $(this.el).find(".new_row_template");
-      item = new this.modelClass({
+      return {
         description: form.find(".description").val(),
         payee: form.find(".payee").val(),
         amount: form.find(".amount").val(),
         timing: form.find(".timing").val()
-      });
-      item.bind('error', this.error);
-      if (this.collection.create(item)) {
-        console.log('created');
+      };
+    },
+    create: function() {
+      var attributes, errors, form, item;
+      form = $(this.el).find(".new_row_template");
+      item = new this.modelClass();
+      attributes = this.parseAttributes();
+      errors = item.validate(attributes);
+      if (errors && errors.length > 0) {
+        console.log("errors");
+        return this.error(errors);
+      } else {
+        this.collection.create(attributes);
+        console.log('collection created');
         this.clearForm();
         return form.find(".description").focus();
       }
     },
-    resort: function() {
-      return $(this.el).find('.datatable').dataTable({
-        "bJQueryUI": true,
-        "sPaginationType": "full_numbers",
-        "sDom": '<""f>t<"F"lp>'
-      });
-    },
-    error: function(model, errors) {
+    resort: function() {},
+    error: function(errors) {
       var error, _i, _len, _results;
-      console.log('error occured');
+      $(this.el).find(".new_row_template .error").removeClass("error");
       _results = [];
       for (_i = 0, _len = errors.length; _i < _len; _i++) {
         error = errors[_i];
-        _results.push(console.log("" + error.field + " " + error.message));
+        _results.push($(this.el).find(".new_row_template ." + error.field).addClass("error"));
       }
       return _results;
     }
@@ -8365,14 +8415,8 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       this.stats.bind('change', this.render);
       this.budgetedExpenses = App.BudgetedExpenses;
       this.budgetedExpenses.fetch();
-      this.budgetedExpenses.bind('add', this.updateStats);
-      this.budgetedExpenses.bind('change', this.updateStats);
-      this.budgetedExpenses.bind('remove', this.updateStats);
       this.incomes = App.Incomes;
-      this.incomes.fetch();
-      this.incomes.bind('add', this.updateStats);
-      this.incomes.bind('change', this.updateStats);
-      return this.incomes.bind('remove', this.updateStats);
+      return this.incomes.fetch();
     },
     render: function() {
       this.updateStats();
@@ -8419,9 +8463,29 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
+  window.App.SavingSingleView = App.SingleView.extend({
+    templateElement: "#saving_row_template"
+  });
+
+  window.App.SavingTableView = App.TableView.extend({
+    collectionClass: App.Savings,
+    rowClass: App.SavingSingleView,
+    modelClass: App.Saving,
+    templateElement: "#savings_template",
+    parseAttributes: function() {
+      var form;
+      form = $(this.el).find(".new_row_template");
+      return {
+        description: form.find(".description").val(),
+        amount: form.find(".amount").val(),
+        timing: form.find(".timing").val()
+      };
+    }
+  });
+
   window.App.ApplicationController = Backbone.Router.extend({
     routes: {
-      '': 'budgeted',
+      '': 'overview',
       'overview': 'overview',
       'savings': 'savings',
       'budgeted': 'budgeted',
@@ -8429,26 +8493,25 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       'history': 'history',
       'income': 'income'
     },
+    overview: function() {
+      var stats;
+      stats = new App.StatsView();
+      return $("#main").empty().append(stats.render());
+    },
+    income: function() {
+      var view;
+      view = new App.IncomeTableView();
+      return $("#main").empty().append(view.render());
+    },
     budgeted: function() {
       var view;
       view = new App.BudgetedTableView();
       return $("#main").empty().append(view.render());
     },
-    income: function() {
-      var view;
-      view = new App.IncomeTableView();
-      $("#main").empty().append(view.render());
-      return $('.datatable').dataTable({
-        "bJQueryUI": true,
-        "sPaginationType": "full_numbers",
-        "sDom": '<""f>t<"F"lp>'
-      });
-    },
-    overview: function() {
-      return this.tab('overview', 'overview');
-    },
     savings: function() {
-      return this.tab('savings', 'savings');
+      var savings;
+      savings = new App.SavingTableView();
+      return $("#main").empty().append(savings.render());
     },
     expenses: function() {
       return this.tab('expenses', 'expenses');
@@ -8463,10 +8526,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
   });
 
   $(function() {
-    var stats;
     new App.ApplicationController();
-    stats = new App.StatsView();
-    $(".content").prepend(stats.render());
     return Backbone.history.start();
   });
 

@@ -5,52 +5,48 @@
   <script src='javascripts/application.js'></script>
 </head>
 <body>
-  <nav>
-    <ul>
-      <li class='cal'>
-        <a href='#budgeted'>
-          <span>Budgeted Expenses</span>
-        </a>
-      </li>
-      <li class='cal'>
-        <a href='#income'>
-          <span>Income</span>
-        </a>
-      </li>
-      <li class='cal'>
-        <a href='#overview'>
-          <span>Overview</span>
-        </a>
-      </li>
-      <li class='gallery'>
-        <a href='#savings'>
-          <span>Savings</span>
-        </a>
-      </li>
-      <li class='cal'>
-        <a href='#expenses'>
-          <span>Expenses</span>
-        </a>
-      </li>
-      <li class='graphs'>
-        <a href='#history'>
-          <span>History</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
-  <div class='content'>
-    <div id='main'></div>
+  <div class='wrapper'>
+    <nav>
+      <ul>
+        <li class='stats'>
+          <a href='#overview'>
+            <span>Overview</span>
+          </a>
+        </li>
+        <li class='money2'>
+          <a href='#income'>
+            <span>Income</span>
+          </a>
+        </li>
+        <li class='price'>
+          <a href='#budgeted'>
+            <span>Budgeted Expenses</span>
+          </a>
+        </li>
+        <li class='graphs'>
+          <a href='#savings'>
+            <span>Savings</span>
+          </a>
+        </li>
+        <!-- %li{ class: "cal" } -->
+        <!-- %a{ href: '#expenses' } -->
+        <!-- %span Expenses -->
+        <!-- %li{ class: "graphs" } -->
+        <!-- %a{ href: '#history' } -->
+        <!-- %span History -->
+      </ul>
+    </nav>
+    <div class='content'>
+      <div id='main'></div>
+    </div>
   </div>
   <script id='budgeted_template' type='text/html'>
-    <div>
-      <a class='right add_new' href='#budgeted'>Add A Budgeted Expense</a>
-    </div>
     <section class='widget table'>
       <div class='head'>
         <h5 class='iFrames'>
           Budgeted Expenses
         </h5>
+        <a class='button add_new'>Add</a>
       </div>
       <table class='display datatable'>
         <thead>
@@ -72,7 +68,7 @@
             </td>
             <td>
               <input class='create' type='submit' value='Add' />
-              <a class='hide' href='#budgeted'>cancel</a>
+              <a class='hide'>cancel</a>
             </td>
           </tr>
           <tr>
@@ -80,7 +76,7 @@
             <th>Payee</th>
             <th>Amount</th>
             <th>Timing</th>
-            <th>Actions</th>
+            <th class='center actions'>Actions</th>
           </tr>
         </thead>
         <tbody id='budgeted_expenses_body'></tbody>
@@ -102,44 +98,62 @@
     </td>
     <td>
       <span class='editable'><%= timing %></span>
-      <input type="text" class="timing" value="<%= timing %>" />
+      <select class='timing'>
+        <option value="Monthly" <% if (timing == 'Monthly') { %>selected="selected"<% } %>>Monthly</option>
+        <option value="Yearly" <% if (timing == 'Yearly') { %>selected="selected"<% } %>>Yearly</option>
+      </select>
     </td>
     <td>
-      <a class='delete' href='#budgeted'>remove</a>
-      <a class='edit' href='#budgeted'>edit</a>
+      <a class='button delete'>remove</a>
+      <a class='button edit'>edit</a>
       <input class='button update' type='submit' value='Update' />
-      <a class='cancel' href='#budgeted'>cancel</a>
+      <a class='cancel'>cancel</a>
     </td>
   </script>
   <script id='stats_template' type='text/html'>
-    <ul>
-      <li>
-        <span class='count currency' id='stats_cash_flow'><%= cashFlow %></span>
-        <span>cash flow</span>
-      </li>
-      <li>
-        <span class='count currency' id='stats_spending'><%= spending %></span>
-        <span>spending</span>
-      </li>
-      <li>
-        <span class='count currency' id='stats_income'><%= income %></span>
-        <span>income</span>
-      </li>
-      <li>
-        <span class='count currency' id='stats_savings'><%= savings %></span>
-        <span>savings</span>
-      </li>
-    </ul>
+    <section class='widget table'>
+      <div class='head'>
+        <h5 class='iFrames'>
+          Monthly Overview
+        </h5>
+      </div>
+      <table class='display datatable' id='stats'>
+        <tbody id='income_body'>
+          <tr>
+            <th>Income</th>
+            <td>
+              <span class='currency'><%= income %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Spending</th>
+            <td>
+              <span class='currency'><%= spending %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Savings</th>
+            <td>
+              <span class='currency'><%= savings %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Cash Flow</th>
+            <td>
+              <span class='currency'><%= cashFlow %></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </script>
   <script id='income_template' type='text/html'>
-    <div>
-      <a class='add_new' href='#income'>Add</a>
-    </div>
     <section class='widget table'>
       <div class='head'>
         <h5 class='iFrames'>
           Income
         </h5>
+        <a class='button add_new'>Add</a>
       </div>
       <table class='display datatable' id='incomes'>
         <thead>
@@ -161,7 +175,7 @@
             </td>
             <td>
               <input class='create' type='submit' value='Add' />
-              <a class='hide' href='#income'>cancel</a>
+              <a class='hide'>cancel</a>
             </td>
           </tr>
           <tr>
@@ -169,11 +183,73 @@
             <th>Payee</th>
             <th>Amount</th>
             <th>Timing</th>
-            <th>Actions</th>
+            <th class='center actions'>Actions</th>
           </tr>
         </thead>
         <tbody id='income_body'></tbody>
       </table>
     </section>
+  </script>
+  <script id='savings_template' type='text/html'>
+    <section class='widget table'>
+      <div class='head'>
+        <h5 class='iFrames'>
+          Income
+        </h5>
+        <a class='add_new button'>Add</a>
+      </div>
+      <table class='display datatable' id='incomes'>
+        <thead>
+          <tr class='new_row_template'>
+            <td>
+              <input class='description' type='text' />
+            </td>
+            <td>
+              <input class='amount' type='text' />
+            </td>
+            <td class='center'>
+              <select class='timing'>
+                <option value='Monthly'>Monthly</option>
+                <option value='Yearly'>Yearly</option>
+              </select>
+            </td>
+            <td>
+              <input class='create' type='submit' value='Add' />
+              <a class='hide'>cancel</a>
+            </td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Timing</th>
+            <th class='center actions'>Actions</th>
+          </tr>
+        </thead>
+        <tbody id='income_body'></tbody>
+      </table>
+    </section>
+  </script>
+  <script id='saving_row_template' type='text/html'>
+    <td>
+      <span class='editable'><%= description %></span>
+      <input type="text" class="description" value="<%= description %>" />
+    </td>
+    <td>
+      <span class='editable currency'><%= amount %></span>
+      <input type="text" class="amount" value="<%= amount %>" />
+    </td>
+    <td>
+      <span class='editable'><%= timing %></span>
+      <select class='timing'>
+        <option value="Monthly" <% if (timing == 'Monthly') { %>selected="selected"<% } %>>Monthly</option>
+        <option value="Yearly" <% if (timing == 'Yearly') { %>selected="selected"<% } %>>Yearly</option>
+      </select>
+    </td>
+    <td>
+      <a class='delete button'>remove</a>
+      <a class='edit button'>edit</a>
+      <input class='button update' type='submit' value='Update' />
+      <a class='cancel'>cancel</a>
+    </td>
   </script>
 </body>
