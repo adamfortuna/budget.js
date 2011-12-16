@@ -100,6 +100,7 @@ section table.datatable tr td input[type=text].error { border: 1px solid red; }
 section table.datatable tr.editing td span, section table.datatable tbody tr td input[type=text], section table.datatable tbody tr td select { display: none; }
 section table.datatable tr.editing td input[type=text], section table.datatable tr.editing td select { display: inline-block; }
 
+section table.datatable tr td a.hide, section table.datatable tr td a.cancel { padding-left: 10px; }
 section.table div.head a.add_new { float: right; margin: 7px; background: url(../images/icons/dark/add.png) no-repeat 9px; padding: 5px 13px 5px 28px; font-size: 12px; text-transform: none; }
 
 /* ==========  Buttons ========== */

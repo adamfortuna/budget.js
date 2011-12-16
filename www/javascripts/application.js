@@ -8228,7 +8228,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       'keyup input': 'checkForSubmit'
     },
     initialize: function() {
-      _.bindAll(this, 'render', 'unrender', 'destroy', 'edit', 'update', 'stopEditing', 'cancel', 'checkForSubmit', 'error');
+      _.bindAll(this, 'render', 'unrender', 'destroy', 'edit', 'update', 'stopEditing', 'cancel', 'checkForSubmit', 'error', 'parseAttributes');
       this.model.bind('change', this.render);
       this.model.bind('remove', this.unrender);
       return this.model.bind('error', this.error);
@@ -8250,7 +8250,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return this.model.destroy();
     },
     edit: function() {
-      $(this.el).parents("table").find('tbody tr').removeClass("editing");
+      $(this.el).parents("table").removeClass("adding").find('tbody tr').removeClass("editing");
       return $(this.el).addClass("editing");
     },
     checkForSubmit: function(e) {
@@ -8263,13 +8263,18 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     stopEditing: function() {
       return $(this.el).removeClass("editing").find(".error").removeClass(".error");
     },
-    update: function() {
-      if (this.model.set({
+    parseAttributes: function() {
+      return {
         amount: $(this.el).find(".amount").val(),
         description: $(this.el).find(".description").val(),
         payee: $(this.el).find(".payee").val(),
         timing: $(this.el).find(".timing").val()
-      })) {
+      };
+    },
+    update: function() {
+      if (this.model.set(this.parseAttributes())) {
+        this.model.save();
+        console.log("set success");
         return this.stopEditing();
       }
     },
@@ -8339,7 +8344,8 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return $(this.el).find("thead input[type='text']").val("");
     },
     showForm: function() {
-      return $(this.el).find("table").addClass("adding");
+      $(this.el).find("table tr").removeClass("editing");
+      return $(this.el).find("table").addClass("adding").find("input:first").focus();
     },
     hideForm: function() {
       this.clearForm();
@@ -8368,7 +8374,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
         this.collection.create(attributes);
         console.log('collection created');
         this.clearForm();
-        return form.find(".description").focus();
+        return form.find("input:first").focus();
       }
     },
     resort: function() {},
@@ -8464,7 +8470,14 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
   });
 
   window.App.SavingSingleView = App.SingleView.extend({
-    templateElement: "#saving_row_template"
+    templateElement: "#saving_row_template",
+    parseAttributes: function() {
+      return {
+        amount: $(this.el).find(".amount").val(),
+        description: $(this.el).find(".description").val(),
+        timing: $(this.el).find(".timing").val()
+      };
+    }
   });
 
   window.App.SavingTableView = App.TableView.extend({

@@ -44,7 +44,8 @@ window.App.TableView = Backbone.View.extend
     $(@el).find("thead input[type='text']").val("")
 
   showForm: ->
-    $(@el).find("table").addClass("adding")
+    $(@el).find("table tr").removeClass("editing")
+    $(@el).find("table").addClass("adding").find("input:first").focus()
 
   hideForm: ->
     @clearForm()
@@ -71,7 +72,7 @@ window.App.TableView = Backbone.View.extend
       @collection.create(attributes)
       console.log('collection created')
       @clearForm()
-      form.find(".description").focus()
+      form.find("input:first").focus()
   
   resort: ->
     # $(@el).find('.datatable').dataTable(

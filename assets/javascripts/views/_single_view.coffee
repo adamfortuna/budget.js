@@ -9,7 +9,7 @@ window.App.SingleView = Backbone.View.extend
     'keyup input': 'checkForSubmit'
 
   initialize: ->
-    _.bindAll(this, 'render', 'unrender', 'destroy', 'edit', 'update', 'stopEditing', 'cancel', 'checkForSubmit', 'error')
+    _.bindAll(this, 'render', 'unrender', 'destroy', 'edit', 'update', 'stopEditing', 'cancel', 'checkForSubmit', 'error', 'parseAttributes')
     @model.bind('change', @render)
     @model.bind('remove', @unrender)
     @model.bind('error', @error)
@@ -30,7 +30,7 @@ window.App.SingleView = Backbone.View.extend
     @model.destroy()
   
   edit: ->
-    $(@el).parents("table").find('tbody tr').removeClass("editing")
+    $(@el).parents("table").removeClass("adding").find('tbody tr').removeClass("editing")
     $(@el).addClass("editing")
   
   checkForSubmit: (e) ->
@@ -42,13 +42,16 @@ window.App.SingleView = Backbone.View.extend
   stopEditing: ->
     $(@el).removeClass("editing").find(".error").removeClass(".error")
   
+  parseAttributes: ->
+    amount: $(@el).find(".amount").val()
+    description: $(@el).find(".description").val()
+    payee: $(@el).find(".payee").val()
+    timing: $(@el).find(".timing").val()
+
   update: ->
-    if @model.set(
-      amount: $(@el).find(".amount").val()
-      description: $(@el).find(".description").val()
-      payee: $(@el).find(".payee").val()
-      timing: $(@el).find(".timing").val()
-    )
+    if @model.set(@parseAttributes())
+      @model.save()
+      console.log("set success")
       @stopEditing()
 
   cancel: -> 
