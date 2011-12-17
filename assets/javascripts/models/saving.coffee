@@ -1,10 +1,4 @@
-window.App.Saving = Backbone.Model.extend
-  weekly_amount: ->
-    @amount * 12 / 52
-
-  daily_amount: ->
-    @amount * 12 / 365
-  
+window.App.Saving = App.Accounting.extend
   validate: (attributes) ->
     errors = []
 

@@ -8054,19 +8054,32 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
 
   window.App = {};
 
-  window.App.Expense = Backbone.Model.extend({
+  window.App.Accounting = Backbone.Model.extend({
+    monthlyAmount: function() {
+      if (this.attributes.timing === 'Yearly') {
+        return this.attributes.amount / 12;
+      } else {
+        return this.attributes.amount;
+      }
+    },
+    yearlyAmount: function() {
+      return this.monthlyAmount * 12;
+    },
+    weeklyAmount: function() {
+      return this.yearlyAmount / 52;
+    },
+    dailyAmount: function() {
+      return this.yearlyAmount / 365;
+    }
+  });
+
+  window.App.BudgetedExpense = App.Accounting.extend({
     defaults: {
       'amount': 0,
       'description': null,
       'payee': null,
       'timing': 'Monthly'
     },
-    weekly_amount: function() {
-      return this.amount * 12 / 52;
-    },
-    daily_amount: function() {
-      return this.amount * 12 / 365;
-    },
     validate: function(attributes) {
       var errors;
       errors = [];
@@ -8103,17 +8116,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
-  window.App.BudgetedExpense = window.App.Expense.extend({
-    sdfsdfgs: function() {}
-  });
-
-  window.App.Income = Backbone.Model.extend({
-    weekly_amount: function() {
-      return this.amount * 12 / 52;
-    },
-    daily_amount: function() {
-      return this.amount * 12 / 365;
-    },
+  window.App.Income = App.Accounting.extend({
     validate: function(attributes) {
       var errors;
       errors = [];
@@ -8150,13 +8153,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
-  window.App.Saving = Backbone.Model.extend({
-    weekly_amount: function() {
-      return this.amount * 12 / 52;
-    },
-    daily_amount: function() {
-      return this.amount * 12 / 365;
-    },
+  window.App.Saving = App.Accounting.extend({
     validate: function(attributes) {
       var errors;
       errors = [];
@@ -8189,28 +8186,44 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
 
   window.App.Stats = Backbone.Model.extend({
     defaults: {
-      "cashFlow": 0,
-      "spending": 0,
-      "income": 0,
-      "savings": 0
+      monthly: {},
+      daily: {},
+      yearly: {}
     }
   });
 
-  window.App.BudgetedExpenseList = Backbone.Collection.extend({
+  window.App.AccountingList = Backbone.Collection.extend({
+    monthlyTotal: function() {
+      return _.reduce(this.models, function(sum, accounting) {
+        var num;
+        num = parseFloat(accounting.monthlyAmount());
+        if (isNaN(num)) num = 0;
+        return num + sum;
+      }, 0);
+    },
+    yearlyTotal: function() {
+      return this.monthlyTotal() * 12;
+    },
+    dailyTotal: function() {
+      return this.yearlyTotal() / 365;
+    }
+  });
+
+  window.App.BudgetedExpenseList = App.AccountingList.extend({
     localStorage: new Store('budgeted_expense_list'),
     model: App.BudgetedExpense
   });
 
   window.App.BudgetedExpenses = new App.BudgetedExpenseList();
 
-  window.App.IncomeList = Backbone.Collection.extend({
+  window.App.IncomeList = App.AccountingList.extend({
     localStorage: new Store('income_list'),
     model: App.Income
   });
 
   window.App.Incomes = new App.IncomeList();
 
-  window.App.SavingsList = Backbone.Collection.extend({
+  window.App.SavingsList = App.AccountingList.extend({
     localStorage: new Store('savings_list'),
     model: App.Saving
   });
@@ -8234,8 +8247,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return this.model.bind('error', this.error);
     },
     render: function() {
-      $(this.el).html(this.template(this.model.toJSON()));
-      $(this.el).find('.currency').formatCurrency();
+      $(this.el).html(this.template(this.model.toJSON())).find('.currency').formatCurrency();
       return this;
     },
     template: function(data) {
@@ -8251,7 +8263,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     },
     edit: function() {
       $(this.el).parents("table").removeClass("adding").find('tbody tr').removeClass("editing");
-      return $(this.el).addClass("editing");
+      return $(this.el).addClass("editing").find('input:first').focus();
     },
     checkForSubmit: function(e) {
       if (e.keyCode === 13) {
@@ -8264,17 +8276,18 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return $(this.el).removeClass("editing").find(".error").removeClass(".error");
     },
     parseAttributes: function() {
+      var e;
+      e = $(this.el);
       return {
-        amount: $(this.el).find(".amount").val(),
-        description: $(this.el).find(".description").val(),
-        payee: $(this.el).find(".payee").val(),
-        timing: $(this.el).find(".timing").val()
+        amount: e.find(".amount").val(),
+        description: e.find(".description").val(),
+        payee: e.find(".payee").val(),
+        timing: e.find(".timing").val()
       };
     },
     update: function() {
       if (this.model.set(this.parseAttributes())) {
         this.model.save();
-        console.log("set success");
         return this.stopEditing();
       }
     },
@@ -8368,11 +8381,9 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       attributes = this.parseAttributes();
       errors = item.validate(attributes);
       if (errors && errors.length > 0) {
-        console.log("errors");
         return this.error(errors);
       } else {
         this.collection.create(attributes);
-        console.log('collection created');
         this.clearForm();
         return form.find("input:first").focus();
       }
@@ -8422,9 +8433,13 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       this.budgetedExpenses = App.BudgetedExpenses;
       this.budgetedExpenses.fetch();
       this.incomes = App.Incomes;
-      return this.incomes.fetch();
+      this.incomes.fetch();
+      this.savings = App.Savings;
+      return this.savings.fetch();
     },
     render: function() {
+      console.log("render");
+      console.log(this.stats.toJSON());
       this.updateStats();
       $(this.el).html(this.template(this.stats.toJSON()));
       $(this.el).find('.currency').formatCurrency();
@@ -8436,36 +8451,27 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return template.apply(this, arguments);
     },
     updateStats: function() {
+      console.log("updating stats");
       return this.stats.set({
-        cashFlow: this.cashFlow(),
-        spending: this.spending(),
-        income: this.income(),
-        savings: 8
+        monthly: {
+          cashFlow: this.incomes.monthlyTotal() - this.savings.monthlyTotal() - this.budgetedExpenses.monthlyTotal(),
+          spending: this.budgetedExpenses.monthlyTotal(),
+          income: this.incomes.monthlyTotal(),
+          savings: this.savings.monthlyTotal()
+        },
+        yearly: {
+          cashFlow: this.incomes.yearlyTotal() - this.savings.yearlyTotal() - this.budgetedExpenses.yearlyTotal(),
+          spending: this.budgetedExpenses.yearlyTotal(),
+          income: this.incomes.yearlyTotal(),
+          savings: this.savings.yearlyTotal()
+        },
+        daily: {
+          cashFlow: this.incomes.dailyTotal() - this.savings.dailyTotal() - this.budgetedExpenses.dailyTotal(),
+          spending: this.budgetedExpenses.dailyTotal(),
+          income: this.incomes.dailyTotal(),
+          savings: this.savings.dailyTotal()
+        }
       });
-    },
-    cashFlow: function() {
-      return this.income() + this.spending();
-    },
-    spending: function() {
-      return this.total_for(this.budgetedExpenses.models) * -1;
-    },
-    income: function() {
-      return this.total_for(this.incomes.models);
-    },
-    class_for_amount: function(amount) {
-      if (amount >= 0) {
-        return "green";
-      } else {
-        return "red";
-      }
-    },
-    total_for: function(collection) {
-      return _.reduce(collection, function(sum, budgeted_expense) {
-        var num;
-        num = parseFloat(budgeted_expense.toJSON().amount);
-        if (isNaN(num)) num = 0;
-        return num + sum;
-      }, 0);
     }
   });
 

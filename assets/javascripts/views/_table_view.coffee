@@ -66,11 +66,9 @@ window.App.TableView = Backbone.View.extend
     errors = item.validate(attributes)
     
     if errors && errors.length > 0
-      console.log("errors")
       @error(errors)
     else
       @collection.create(attributes)
-      console.log('collection created')
       @clearForm()
       form.find("input:first").focus()
   

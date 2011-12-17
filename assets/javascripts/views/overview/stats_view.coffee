@@ -7,15 +7,20 @@ window.App.StatsView = Backbone.View.extend
   initialize: ->
     _.bindAll(@, 'render', 'updateStats')
     @stats = new App.Stats()
-    @stats.bind('change', this.render)
-    
+    @stats.bind('change', @render)
+
     @budgetedExpenses = App.BudgetedExpenses
     @budgetedExpenses.fetch()
 
     @incomes = App.Incomes
     @incomes.fetch()
 
+    @savings = App.Savings
+    @savings.fetch()
+
   render: ->
+    console.log("render")
+    console.log(@stats.toJSON())
     @updateStats()
     $(@el).html(@template(@stats.toJSON()))
     $(@el).find('.currency').formatCurrency()
@@ -26,32 +31,21 @@ window.App.StatsView = Backbone.View.extend
     template.apply(@, arguments)
 
   updateStats: ->
+    console.log("updating stats")
     @stats.set(
-      cashFlow: @cashFlow()
-      spending: @spending()
-      income: @income()
-      savings: 8 
+      monthly:
+        cashFlow: @incomes.monthlyTotal() - @savings.monthlyTotal() - @budgetedExpenses.monthlyTotal()
+        spending: @budgetedExpenses.monthlyTotal()
+        income: @incomes.monthlyTotal()
+        savings: @savings.monthlyTotal()
+      yearly:
+        cashFlow: @incomes.yearlyTotal() - @savings.yearlyTotal() - @budgetedExpenses.yearlyTotal()
+        spending: @budgetedExpenses.yearlyTotal()
+        income: @incomes.yearlyTotal()
+        savings: @savings.yearlyTotal()
+      daily:
+        cashFlow: @incomes.dailyTotal() - @savings.dailyTotal() - @budgetedExpenses.dailyTotal()
+        spending: @budgetedExpenses.dailyTotal()
+        income: @incomes.dailyTotal()
+        savings: @savings.dailyTotal()
     )
-
-  cashFlow: ->
-    @income() + @spending()
-  
-  spending: ->
-    @total_for(@budgetedExpenses.models) * -1
-
-  income: ->
-    @total_for(@incomes.models)
-
-  class_for_amount: (amount) ->
-    if amount >= 0
-      "green"
-    else
-      "red"
-
-  total_for: (collection) ->
-    _.reduce(collection, (sum, budgeted_expense) ->
-      num = parseFloat(budgeted_expense.toJSON().amount)
-      if(isNaN(num))
-        num = 0
-      num + sum
-    , 0)

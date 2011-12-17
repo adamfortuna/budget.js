@@ -117,30 +117,100 @@
           Monthly Overview
         </h5>
       </div>
-      <table class='display datatable' id='stats'>
-        <tbody id='income_body'>
+      <table class='display datatable'>
+        <tbody>
           <tr>
             <th>Income</th>
             <td>
-              <span class='currency'><%= income %></span>
+              <span class='currency'><%= monthly.income %></span>
             </td>
           </tr>
           <tr>
             <th>Spending</th>
             <td>
-              <span class='currency'><%= spending %></span>
+              <span class='currency'><%= monthly.spending %></span>
             </td>
           </tr>
           <tr>
             <th>Savings</th>
             <td>
-              <span class='currency'><%= savings %></span>
+              <span class='currency'><%= monthly.savings %></span>
             </td>
           </tr>
           <tr>
             <th>Cash Flow</th>
             <td>
-              <span class='currency'><%= cashFlow %></span>
+              <span class='currency'><%= monthly.cashFlow %></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section class='widget table'>
+      <div class='head'>
+        <h5 class='iFrames'>
+          Yearly Overview
+        </h5>
+      </div>
+      <table class='display datatable'>
+        <tbody>
+          <tr>
+            <th>Income</th>
+            <td>
+              <span class='currency'><%= yearly.income %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Spending</th>
+            <td>
+              <span class='currency'><%= yearly.spending %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Savings</th>
+            <td>
+              <span class='currency'><%= yearly.savings %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Cash Flow</th>
+            <td>
+              <span class='currency'><%= yearly.cashFlow %></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section class='widget table'>
+      <div class='head'>
+        <h5 class='iFrames'>
+          Daily Overview
+        </h5>
+      </div>
+      <table class='display datatable'>
+        <tbody>
+          <tr>
+            <th>Income</th>
+            <td>
+              <span class='currency'><%= daily.income %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Spending</th>
+            <td>
+              <span class='currency'><%= daily.spending %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Savings</th>
+            <td>
+              <span class='currency'><%= daily.savings %></span>
+            </td>
+          </tr>
+          <tr>
+            <th>Cash Flow</th>
+            <td>
+              <span class='currency'><%= daily.cashFlow %></span>
             </td>
           </tr>
         </tbody>

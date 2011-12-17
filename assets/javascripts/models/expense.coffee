@@ -1,16 +1,10 @@
-window.App.Expense = Backbone.Model.extend
+window.App.BudgetedExpense = App.Accounting.extend
   defaults:
     'amount': 0
     'description': null
     'payee': null
     'timing': 'Monthly'
 
-  weekly_amount: ->
-    @amount * 12 / 52
-
-  daily_amount: ->
-    @amount * 12 / 365
-  
   validate: (attributes) ->
     errors = []
 
@@ -44,6 +38,3 @@ window.App.Expense = Backbone.Model.extend
       )
 
     return errors if errors.length > 0
-    
-window.App.BudgetedExpense = window.App.Expense.extend
-  sdfsdfgs: ()->

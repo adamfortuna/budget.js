@@ -16,7 +16,7 @@ window.App.SingleView = Backbone.View.extend
 
   render: ->
     $(@el).html(@template(@model.toJSON()))
-    $(@el).find('.currency').formatCurrency()
+          .find('.currency').formatCurrency()
     return @
 
   template: (data) ->
@@ -30,8 +30,14 @@ window.App.SingleView = Backbone.View.extend
     @model.destroy()
   
   edit: ->
-    $(@el).parents("table").removeClass("adding").find('tbody tr').removeClass("editing")
-    $(@el).addClass("editing")
+    $(@el).parents("table")
+          .removeClass("adding")
+          .find('tbody tr')
+          .removeClass("editing")
+
+    $(@el).addClass("editing")        
+          .find('input:first')
+          .focus()
   
   checkForSubmit: (e) ->
     if e.keyCode == 13
@@ -43,15 +49,15 @@ window.App.SingleView = Backbone.View.extend
     $(@el).removeClass("editing").find(".error").removeClass(".error")
   
   parseAttributes: ->
-    amount: $(@el).find(".amount").val()
-    description: $(@el).find(".description").val()
-    payee: $(@el).find(".payee").val()
-    timing: $(@el).find(".timing").val()
+    e = $(@el)
+    amount: e.find(".amount").val()
+    description: e.find(".description").val()
+    payee: e.find(".payee").val()
+    timing: e.find(".timing").val()
 
   update: ->
     if @model.set(@parseAttributes())
       @model.save()
-      console.log("set success")
       @stopEditing()
 
   cancel: -> 

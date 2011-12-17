@@ -90,24 +90,68 @@
       %div{ class: "head" }
         %h5{ class: "iFrames" }
           Monthly Overview
-      %table{ class: "display datatable", id: 'stats' }
-        %tbody{ id: "income_body" }
+      %table{ class: "display datatable" }
+        %tbody
           %tr
             %th Income
             %td 
-              %span{ class: "currency" } <%= income %>
+              %span{ class: "currency" } <%= monthly.income %>
           %tr
             %th Spending
             %td 
-              %span{ class: "currency" } <%= spending %>
+              %span{ class: "currency" } <%= monthly.spending %>
           %tr
             %th Savings
             %td 
-              %span{ class: "currency" } <%= savings %>
+              %span{ class: "currency" } <%= monthly.savings %>
           %tr
             %th Cash Flow
             %td 
-              %span{ class: "currency" } <%= cashFlow %>
+              %span{ class: "currency" } <%= monthly.cashFlow %>
+    %section{ class: "widget table"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Yearly Overview
+      %table{ class: "display datatable" }
+        %tbody
+          %tr
+            %th Income
+            %td 
+              %span{ class: "currency" } <%= yearly.income %>
+          %tr
+            %th Spending
+            %td 
+              %span{ class: "currency" } <%= yearly.spending %>
+          %tr
+            %th Savings
+            %td 
+              %span{ class: "currency" } <%= yearly.savings %>
+          %tr
+            %th Cash Flow
+            %td 
+              %span{ class: "currency" } <%= yearly.cashFlow %>
+    %section{ class: "widget table"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Daily Overview
+      %table{ class: "display datatable" }
+        %tbody
+          %tr
+            %th Income
+            %td 
+              %span{ class: "currency" } <%= daily.income %>
+          %tr
+            %th Spending
+            %td 
+              %span{ class: "currency" } <%= daily.spending %>
+          %tr
+            %th Savings
+            %td 
+              %span{ class: "currency" } <%= daily.savings %>
+          %tr
+            %th Cash Flow
+            %td 
+              %span{ class: "currency" } <%= daily.cashFlow %>
 
 
   %script{ type: "text/html", id: "income_template" }
