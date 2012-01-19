@@ -25,7 +25,7 @@ table.display thead th div.DataTables_sort_wrapper span { position: absolute; to
 .dataTables_length { float: left; color: #878787; margin: 7px 5px 0 5px; }
 .dataTables_length label { padding-top: 10px; font-size: 11px; }
 .dataTables_length select { font-size: 11px; margin: 0 5px; }
-.dataTables_filter { text-align: left; margin: 4px 8px 2px 10px; position: absolute; right: 0; top: -34px; color: #878787; font-size: 11px; }
+.dataTables_filter { text-align: left; margin: 4px 8px 2px 10px; position: absolute; right: 0; top: -34px; color: #878787; font-size: 11px; right: 75px; }
 .dataTables_filter input[type="text"] { padding: 3px 5px; border: 1px solid #D5D5D5; width: 200px; position: relative; margin-left: 6px; -moz-border-radius: 2px; -webkit-border-radius: 2px; -khtml-border-radius: 2px; border-radius: 2px; color: #878787; }
 .dataTables_filter .srch { position: absolute; right: 6px; top: 7px; background: url(../images/searchSmall.png) no-repeat 0 0; border: none; width: 9px; height: 9px; }
 .dataTables_info { float: left; }

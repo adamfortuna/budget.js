@@ -1,4 +1,9 @@
-window.App.TableView = Backbone.View.extend
+window.App.ExpenseTableView = App.TableView.extend
+  collectionClass: App.Expenses
+  rowClass: App.ExpenseSingleView
+  modelClass: App.Expense
+  templateElement: "#expense_template"
+
   tagName: 'section'
   events: 
     'click .create': 'create'
@@ -8,13 +13,24 @@ window.App.TableView = Backbone.View.extend
 
   initialize: ->
     _.bindAll(@, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error', 'parseAttributes')
+    
+    @budgetedExpenses = App.BudgetedExpenses
+    @budgetedExpenses.fetch()
+    @budgetedExpensesNames = @budgetedExpenses.map (budgetedExpense) ->
+      budgetedExpense.get('description')
+
+    @budgets = App.Budgets
+    @budgets.fetch()
+    @budgetNames = @budgets.map (budget) ->
+      budget.get('description')
+
     @collection = @collectionClass
     @collection.fetch()
     @collection.bind('add', @appendItemAndResort)
     @collection.bind('remove', @resort)
 
   render: ->
-    $(@el).append(@template())
+    $(@el).append(@template({ "budgets": @budgetNames.sort(), "bills": @budgetedExpensesNames.sort() }))
     _(@collection.models).each ((item) ->
       @appendItem item
     ), @
@@ -41,23 +57,22 @@ window.App.TableView = Backbone.View.extend
 
   clearForm: ->
     $(@el).find(".new_row_template").find(".error").removeClass("error")
-    $(@el).find("thead input[type='text']").val("")
+    $(@el).find(".new_row_template input[type='text']").val("")
 
   showForm: ->
     $(@el).find("table tr").removeClass("editing")
-    $(@el).find("table").addClass("adding").find("input:first").focus()
+    $(@el).addClass("adding").find("input:first").focus()
 
   hideForm: ->
     @clearForm()
-    $(@el).find("table").removeClass("adding")
+    $(@el).removeClass("adding")
   
   parseAttributes: ->
     form = $(@el).find(".new_row_template")
       
-    description: form.find(".description").val()
     payee: form.find(".payee").val()
     amount: form.find(".amount").val()
-    timing: form.find(".timing").val()
+    expense: form.find(".expense").val()
 
   create: ->
     form = $(@el).find(".new_row_template")
@@ -78,7 +93,6 @@ window.App.TableView = Backbone.View.extend
       "sPaginationType": "full_numbers"
       "sDom": '<""f>t<"F"lp>'
     )
-    
 
   error: (errors) ->
     $(@el).find(".new_row_template .error").removeClass("error")

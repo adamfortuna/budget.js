@@ -2,6 +2,7 @@ window.App.ApplicationController = Backbone.Router.extend
   routes:
     '': 'overview'
     'overview': 'overview'
+    'budgets': 'budgets'
     'savings': 'savings'
     'budgeted': 'budgeted'
     'expenses': 'expenses'
@@ -12,6 +13,10 @@ window.App.ApplicationController = Backbone.Router.extend
     stats = new App.StatsView()
     $("#main").empty().append(stats.render())
 
+  budgets: ->
+    budgets = new App.BudgetTableView()
+    $("#main").empty().append(budgets.render())
+    
   income: ->
     view = new App.IncomeTableView()
     $("#main").empty().append(view.render())
@@ -25,7 +30,8 @@ window.App.ApplicationController = Backbone.Router.extend
     $("#main").empty().append(savings.render())
 
   expenses: ->
-    @tab('expenses', 'expenses')
+    expenses = new App.ExpenseTableView()
+    $("#main").empty().append(expenses.render())
     
   history: ->
     @tab('history', 'history')

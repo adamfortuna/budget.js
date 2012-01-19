@@ -8026,6 +8026,37 @@ Backbone.sync = function(method, model, options, error) {
 		});
 	};
 })(jQuery, window, document);
+
+
+jQuery.fn.dataTableExt.oSort['currency-asc'] = function(a,b) {
+    /* Remove any commas (assumes that if present all strings will have a fixed number of d.p) */
+    var x = a == "-" ? 0 : a.replace( /,/g, "" );
+    var y = b == "-" ? 0 : b.replace( /,/g, "" );
+     
+    /* Remove the currency sign */
+    x = x.substring( 1 );
+    y = y.substring( 1 );
+     
+    /* Parse and return */
+    x = parseFloat( x );
+    y = parseFloat( y );
+    return x - y;
+};
+ 
+jQuery.fn.dataTableExt.oSort['currency-desc'] = function(a,b) {
+    /* Remove any commas (assumes that if present all strings will have a fixed number of d.p) */
+    var x = a == "-" ? 0 : a.replace( /,/g, "" );
+    var y = b == "-" ? 0 : b.replace( /,/g, "" );
+     
+    /* Remove the currency sign */
+    x = x.substring( 1 );
+    y = y.substring( 1 );
+     
+    /* Parse and return */
+    x = parseFloat( x );
+    y = parseFloat( y );
+    return y - x;
+};
 (function($){$.formatCurrency={};$.formatCurrency.regions=[];$.formatCurrency.regions[""]={symbol:"$",positiveFormat:"%s%n",negativeFormat:"(%s%n)",decimalSymbol:".",digitGroupSymbol:",",groupDigits:true};
 $.fn.formatCurrency=function(destination,settings){if(arguments.length==1&&typeof destination!=="string"){settings=destination;destination=false
 }var defaults={name:"formatCurrency",colorize:false,region:"",global:true,roundToDecimalPlace:2,eventOnDecimalsEntered:false};defaults=$.extend(defaults,$.formatCurrency.regions[""]);
@@ -8073,12 +8104,49 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     }
   });
 
+  window.App.Budget = App.Accounting.extend({
+    defaults: {
+      'amount': 0,
+      'description': null,
+      'timing': 'Monthly'
+    },
+    validate: function(attributes) {
+      var errors;
+      errors = [];
+      if (!attributes.amount || attributes.amount.length === 0) {
+        errors.push({
+          'field': 'amount',
+          'message': 'cannot be empty'
+        });
+      } else if (isNaN(attributes.amount)) {
+        errors.push({
+          'field': 'amount',
+          'message': 'must be a number'
+        });
+      }
+      if (!attributes.description || attributes.description.length === 0) {
+        errors.push({
+          'field': 'description',
+          'message': 'cannot be empty'
+        });
+      }
+      if (!attributes.timing || attributes.timing.length === 0) {
+        errors.push({
+          'field': 'timing',
+          'message': 'cannot be empty'
+        });
+      }
+      if (errors.length > 0) return errors;
+    }
+  });
+
   window.App.BudgetedExpense = App.Accounting.extend({
     defaults: {
       'amount': 0,
       'description': null,
       'payee': null,
-      'timing': 'Monthly'
+      'timing': 'Monthly',
+      'bill': false
     },
     validate: function(attributes) {
       var errors;
@@ -8109,6 +8177,36 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       if (!attributes.timing || attributes.timing.length === 0) {
         errors.push({
           'field': 'timing',
+          'message': 'cannot be empty'
+        });
+      }
+      if (errors.length > 0) return errors;
+    }
+  });
+
+  window.App.Expense = App.Accounting.extend({
+    defaults: {
+      'amount': 0,
+      'payee': null,
+      'expense': null
+    },
+    validate: function(attributes) {
+      var errors;
+      errors = [];
+      if (!attributes.amount || attributes.amount.length === 0) {
+        errors.push({
+          'field': 'amount',
+          'message': 'cannot be empty'
+        });
+      } else if (isNaN(attributes.amount)) {
+        errors.push({
+          'field': 'amount',
+          'message': 'must be a number'
+        });
+      }
+      if (!attributes.payee || attributes.payee.length === 0) {
+        errors.push({
+          'field': 'payee',
           'message': 'cannot be empty'
         });
       }
@@ -8188,7 +8286,8 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     defaults: {
       monthly: {},
       daily: {},
-      yearly: {}
+      yearly: {},
+      rate: {}
     }
   });
 
@@ -8215,6 +8314,20 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
   });
 
   window.App.BudgetedExpenses = new App.BudgetedExpenseList();
+
+  window.App.BudgetsList = App.AccountingList.extend({
+    localStorage: new Store('budgets_list'),
+    model: App.Budget
+  });
+
+  window.App.Budgets = new App.BudgetsList();
+
+  window.App.ExpenseList = App.AccountingList.extend({
+    localStorage: new Store('expense_list'),
+    model: App.Expense
+  });
+
+  window.App.Expenses = new App.ExpenseList();
 
   window.App.IncomeList = App.AccountingList.extend({
     localStorage: new Store('income_list'),
@@ -8388,7 +8501,13 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
         return form.find("input:first").focus();
       }
     },
-    resort: function() {},
+    resort: function() {
+      return $(this.el).find('.datatable').dataTable({
+        "bJQueryUI": true,
+        "sPaginationType": "full_numbers",
+        "sDom": '<""f>t<"F"lp>'
+      });
+    },
     error: function(errors) {
       var error, _i, _len, _results;
       $(this.el).find(".new_row_template .error").removeClass("error");
@@ -8412,6 +8531,154 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     templateElement: "#budgeted_template"
   });
 
+  window.App.BudgetSingleView = App.SingleView.extend({
+    templateElement: "#saving_budget_row_template",
+    parseAttributes: function() {
+      return {
+        description: $(this.el).find(".description").val(),
+        timing: $(this.el).find(".timing").val(),
+        amount: $(this.el).find(".amount").val()
+      };
+    }
+  });
+
+  window.App.BudgetTableView = App.TableView.extend({
+    collectionClass: App.Budgets,
+    rowClass: App.BudgetSingleView,
+    modelClass: App.Budget,
+    templateElement: "#budgets_template",
+    parseAttributes: function() {
+      var form;
+      form = $(this.el).find(".new_row_template");
+      return {
+        timing: form.find(".timing").val(),
+        description: form.find(".description").val(),
+        amount: form.find(".amount").val()
+      };
+    }
+  });
+
+  window.App.ExpenseSingleView = App.SingleView.extend({
+    templateElement: "#expense_row_template"
+  });
+
+  window.App.ExpenseTableView = App.TableView.extend({
+    collectionClass: App.Expenses,
+    rowClass: App.ExpenseSingleView,
+    modelClass: App.Expense,
+    templateElement: "#expense_template",
+    tagName: 'section',
+    events: {
+      'click .create': 'create',
+      'click .add_new': 'showForm',
+      'click .new_row_template .hide': 'hideForm',
+      'keyup .new_row_template input': 'checkForSubmit'
+    },
+    initialize: function() {
+      _.bindAll(this, 'render', 'create', 'appendItem', 'appendItemAndResort', 'checkForSubmit', 'template', 'clearForm', 'showForm', 'hideForm', 'resort', 'error', 'parseAttributes');
+      this.budgetedExpenses = App.BudgetedExpenses;
+      this.budgetedExpenses.fetch();
+      this.budgetedExpensesNames = this.budgetedExpenses.map(function(budgetedExpense) {
+        return budgetedExpense.get('description');
+      });
+      this.budgets = App.Budgets;
+      this.budgets.fetch();
+      this.budgetNames = this.budgets.map(function(budget) {
+        return budget.get('description');
+      });
+      this.collection = this.collectionClass;
+      this.collection.fetch();
+      this.collection.bind('add', this.appendItemAndResort);
+      return this.collection.bind('remove', this.resort);
+    },
+    render: function() {
+      $(this.el).append(this.template({
+        "budgets": this.budgetNames.sort(),
+        "bills": this.budgetedExpensesNames.sort()
+      }));
+      _(this.collection.models).each((function(item) {
+        return this.appendItem(item);
+      }), this);
+      this.resort();
+      return this.el;
+    },
+    template: function() {
+      var template;
+      template = _.template($(this.templateElement).text());
+      return template.apply(this, arguments);
+    },
+    checkForSubmit: function(e) {
+      if (e.keyCode === 13) {
+        return this.create();
+      } else if (e.keyCode === 27) {
+        return this.hideForm();
+      }
+    },
+    appendItemAndResort: function(item) {
+      this.appendItem(item);
+      return this.resort();
+    },
+    appendItem: function(item) {
+      var newItem;
+      newItem = new this.rowClass({
+        model: item
+      });
+      return $(this.el).find("tbody").prepend(newItem.render().el);
+    },
+    clearForm: function() {
+      $(this.el).find(".new_row_template").find(".error").removeClass("error");
+      return $(this.el).find(".new_row_template input[type='text']").val("");
+    },
+    showForm: function() {
+      $(this.el).find("table tr").removeClass("editing");
+      return $(this.el).addClass("adding").find("input:first").focus();
+    },
+    hideForm: function() {
+      this.clearForm();
+      return $(this.el).removeClass("adding");
+    },
+    parseAttributes: function() {
+      var form;
+      form = $(this.el).find(".new_row_template");
+      return {
+        payee: form.find(".payee").val(),
+        amount: form.find(".amount").val(),
+        expense: form.find(".expense").val()
+      };
+    },
+    create: function() {
+      var attributes, errors, form, item;
+      form = $(this.el).find(".new_row_template");
+      item = new this.modelClass();
+      attributes = this.parseAttributes();
+      errors = item.validate(attributes);
+      if (errors && errors.length > 0) {
+        return this.error(errors);
+      } else {
+        this.collection.create(attributes);
+        this.clearForm();
+        return form.find("input:first").focus();
+      }
+    },
+    resort: function() {
+      return $(this.el).find('.datatable').dataTable({
+        "bJQueryUI": true,
+        "sPaginationType": "full_numbers",
+        "sDom": '<""f>t<"F"lp>'
+      });
+    },
+    error: function(errors) {
+      var error, _i, _len, _results;
+      $(this.el).find(".new_row_template .error").removeClass("error");
+      _results = [];
+      for (_i = 0, _len = errors.length; _i < _len; _i++) {
+        error = errors[_i];
+        _results.push($(this.el).find(".new_row_template ." + error.field).addClass("error"));
+      }
+      return _results;
+    }
+  });
+
   window.App.IncomeSingleView = App.SingleView.extend({
     templateElement: "#single_row_template"
   });
@@ -8432,14 +8699,14 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       this.stats.bind('change', this.render);
       this.budgetedExpenses = App.BudgetedExpenses;
       this.budgetedExpenses.fetch();
+      this.budgets = App.Budgets;
+      this.budgets.fetch();
       this.incomes = App.Incomes;
       this.incomes.fetch();
       this.savings = App.Savings;
       return this.savings.fetch();
     },
     render: function() {
-      console.log("render");
-      console.log(this.stats.toJSON());
       this.updateStats();
       $(this.el).html(this.template(this.stats.toJSON()));
       $(this.el).find('.currency').formatCurrency();
@@ -8451,27 +8718,39 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return template.apply(this, arguments);
     },
     updateStats: function() {
-      console.log("updating stats");
       return this.stats.set({
         monthly: {
-          cashFlow: this.incomes.monthlyTotal() - this.savings.monthlyTotal() - this.budgetedExpenses.monthlyTotal(),
-          spending: this.budgetedExpenses.monthlyTotal(),
+          cashFlow: this.incomes.monthlyTotal() - this.savings.monthlyTotal() - this.budgetedExpenses.monthlyTotal() - this.budgets.monthlyTotal(),
+          bills: this.budgetedExpenses.monthlyTotal(),
+          budgets: this.budgets.monthlyTotal(),
           income: this.incomes.monthlyTotal(),
           savings: this.savings.monthlyTotal()
         },
         yearly: {
-          cashFlow: this.incomes.yearlyTotal() - this.savings.yearlyTotal() - this.budgetedExpenses.yearlyTotal(),
-          spending: this.budgetedExpenses.yearlyTotal(),
+          cashFlow: this.incomes.yearlyTotal() - this.savings.yearlyTotal() - this.budgetedExpenses.yearlyTotal() - this.budgets.yearlyTotal(),
+          bills: this.budgetedExpenses.yearlyTotal(),
+          budgets: this.budgets.yearlyTotal(),
           income: this.incomes.yearlyTotal(),
           savings: this.savings.yearlyTotal()
         },
         daily: {
-          cashFlow: this.incomes.dailyTotal() - this.savings.dailyTotal() - this.budgetedExpenses.dailyTotal(),
-          spending: this.budgetedExpenses.dailyTotal(),
+          cashFlow: this.incomes.dailyTotal() - this.savings.dailyTotal() - this.budgetedExpenses.dailyTotal() - this.budgets.dailyTotal(),
+          bills: this.budgetedExpenses.dailyTotal(),
+          budgets: this.budgets.dailyTotal(),
           income: this.incomes.dailyTotal(),
           savings: this.savings.dailyTotal()
+        },
+        rate: {
+          cashFlow: this.to_percent((this.incomes.monthlyTotal() - this.savings.monthlyTotal() - this.budgetedExpenses.monthlyTotal() - this.budgets.monthlyTotal()) / this.incomes.monthlyTotal()),
+          bills: this.to_percent(this.budgetedExpenses.monthlyTotal() / this.incomes.monthlyTotal()),
+          budgets: this.to_percent(this.budgets.monthlyTotal() / this.incomes.monthlyTotal()),
+          income: this.to_percent(1),
+          savings: this.to_percent(this.savings.monthlyTotal() / this.incomes.monthlyTotal())
         }
       });
+    },
+    to_percent: function(number) {
+      return (number * 100).toFixed(2) + "%";
     }
   });
 
@@ -8506,6 +8785,7 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
     routes: {
       '': 'overview',
       'overview': 'overview',
+      'budgets': 'budgets',
       'savings': 'savings',
       'budgeted': 'budgeted',
       'expenses': 'expenses',
@@ -8516,6 +8796,11 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       var stats;
       stats = new App.StatsView();
       return $("#main").empty().append(stats.render());
+    },
+    budgets: function() {
+      var budgets;
+      budgets = new App.BudgetTableView();
+      return $("#main").empty().append(budgets.render());
     },
     income: function() {
       var view;
@@ -8533,7 +8818,9 @@ case"float":return"Float";default:throw"invalid parseType"}}function generateReg
       return $("#main").empty().append(savings.render());
     },
     expenses: function() {
-      return this.tab('expenses', 'expenses');
+      var expenses;
+      expenses = new App.ExpenseTableView();
+      return $("#main").empty().append(expenses.render());
     },
     history: function() {
       return this.tab('history', 'history');

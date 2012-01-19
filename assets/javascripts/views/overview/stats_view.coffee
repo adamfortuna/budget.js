@@ -11,6 +11,9 @@ window.App.StatsView = Backbone.View.extend
 
     @budgetedExpenses = App.BudgetedExpenses
     @budgetedExpenses.fetch()
+    
+    @budgets = App.Budgets
+    @budgets.fetch()
 
     @incomes = App.Incomes
     @incomes.fetch()
@@ -19,11 +22,10 @@ window.App.StatsView = Backbone.View.extend
     @savings.fetch()
 
   render: ->
-    console.log("render")
-    console.log(@stats.toJSON())
     @updateStats()
     $(@el).html(@template(@stats.toJSON()))
     $(@el).find('.currency').formatCurrency()
+    # $(@el).find('.percentage').formatNumber({ format: "#.0%", locale: "us" });
     @el
 
   template: ->
@@ -31,21 +33,32 @@ window.App.StatsView = Backbone.View.extend
     template.apply(@, arguments)
 
   updateStats: ->
-    console.log("updating stats")
     @stats.set(
       monthly:
-        cashFlow: @incomes.monthlyTotal() - @savings.monthlyTotal() - @budgetedExpenses.monthlyTotal()
-        spending: @budgetedExpenses.monthlyTotal()
+        cashFlow: @incomes.monthlyTotal() - @savings.monthlyTotal() - @budgetedExpenses.monthlyTotal() - @budgets.monthlyTotal()
+        bills: @budgetedExpenses.monthlyTotal()
+        budgets: @budgets.monthlyTotal()
         income: @incomes.monthlyTotal()
         savings: @savings.monthlyTotal()
       yearly:
-        cashFlow: @incomes.yearlyTotal() - @savings.yearlyTotal() - @budgetedExpenses.yearlyTotal()
-        spending: @budgetedExpenses.yearlyTotal()
+        cashFlow: @incomes.yearlyTotal() - @savings.yearlyTotal() - @budgetedExpenses.yearlyTotal() - @budgets.yearlyTotal()
+        bills: @budgetedExpenses.yearlyTotal()
+        budgets: @budgets.yearlyTotal()
         income: @incomes.yearlyTotal()
         savings: @savings.yearlyTotal()
       daily:
-        cashFlow: @incomes.dailyTotal() - @savings.dailyTotal() - @budgetedExpenses.dailyTotal()
-        spending: @budgetedExpenses.dailyTotal()
+        cashFlow: @incomes.dailyTotal() - @savings.dailyTotal() - @budgetedExpenses.dailyTotal() - @budgets.dailyTotal()
+        bills: @budgetedExpenses.dailyTotal()
+        budgets: @budgets.dailyTotal()
         income: @incomes.dailyTotal()
         savings: @savings.dailyTotal()
+      rate:
+        cashFlow: @to_percent((@incomes.monthlyTotal() - @savings.monthlyTotal() - @budgetedExpenses.monthlyTotal() - @budgets.monthlyTotal()) / @incomes.monthlyTotal())
+        bills: @to_percent(@budgetedExpenses.monthlyTotal() / @incomes.monthlyTotal())
+        budgets: @to_percent(@budgets.monthlyTotal() / @incomes.monthlyTotal())
+        income: @to_percent(1)
+        savings: @to_percent(@savings.monthlyTotal() / @incomes.monthlyTotal())
     )
+    
+  to_percent: (number) -> 
+    (number * 100).toFixed(2) + "%"

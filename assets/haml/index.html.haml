@@ -14,14 +14,17 @@
           %a{ href: '#income' }
             %span Income
         %li{ class: "price" }
+          %a{ href: '#budgets' }
+            %span Budgets
+        %li{ class: "price" }
           %a{ href: '#budgeted' }
-            %span Budgeted Expenses
+            %span Bills
         %li{ class: "graphs" }
           %a{ href: '#savings' }
             %span Savings
-        / %li{ class: "cal" }
-        /   %a{ href: '#expenses' }
-        /     %span Expenses
+        %li{ class: "cal" }
+          %a{ href: '#expenses' }
+            %span Expenses
         / %li{ class: "graphs" }
         /   %a{ href: '#history' }
         /     %span History
@@ -34,7 +37,7 @@
     %section{ class: "widget table"}
       %div{ class: "head" }
         %h5{ class: "iFrames" }
-          Budgeted Expenses
+          Bills
         %a{ class: 'button add_new' } Add
       %table{ class: 'display datatable' }
         %thead
@@ -89,69 +92,66 @@
     %section{ class: "widget table"}
       %div{ class: "head" }
         %h5{ class: "iFrames" }
-          Monthly Overview
+          Overview
       %table{ class: "display datatable" }
+        %thead
+          %tr
+            %td
+            %th Daily
+            %th Monthly
+            %th Yearly
+            %th Rate
         %tbody
           %tr
             %th Income
-            %td 
-              %span{ class: "currency" } <%= monthly.income %>
-          %tr
-            %th Spending
-            %td 
-              %span{ class: "currency" } <%= monthly.spending %>
-          %tr
-            %th Savings
-            %td 
-              %span{ class: "currency" } <%= monthly.savings %>
-          %tr
-            %th Cash Flow
-            %td 
-              %span{ class: "currency" } <%= monthly.cashFlow %>
-    %section{ class: "widget table"}
-      %div{ class: "head" }
-        %h5{ class: "iFrames" }
-          Yearly Overview
-      %table{ class: "display datatable" }
-        %tbody
-          %tr
-            %th Income
-            %td 
-              %span{ class: "currency" } <%= yearly.income %>
-          %tr
-            %th Spending
-            %td 
-              %span{ class: "currency" } <%= yearly.spending %>
-          %tr
-            %th Savings
-            %td 
-              %span{ class: "currency" } <%= yearly.savings %>
-          %tr
-            %th Cash Flow
-            %td 
-              %span{ class: "currency" } <%= yearly.cashFlow %>
-    %section{ class: "widget table"}
-      %div{ class: "head" }
-        %h5{ class: "iFrames" }
-          Daily Overview
-      %table{ class: "display datatable" }
-        %tbody
-          %tr
-            %th Income
-            %td 
+            %td
               %span{ class: "currency" } <%= daily.income %>
+            %td
+              %span{ class: "currency" } <%= monthly.income %>
+            %td
+              %span{ class: "currency" } <%= yearly.income %>
+            %td
+              %span{ class: "percentage" } <%= rate.income %>
           %tr
-            %th Spending
+            %th Budgeted
             %td 
-              %span{ class: "currency" } <%= daily.spending %>
+              %span{ class: "currency" } <%= daily.budgets %>
+            %td 
+              %span{ class: "currency" } <%= monthly.budgets %>
+            %td 
+              %span{ class: "currency" } <%= yearly.budgets %>
+            %td
+              %span{ class: "percentage" } <%= rate.budgets %>
+          %tr
+            %th Bills
+            %td 
+              %span{ class: "currency" } <%= daily.bills %>
+            %td 
+              %span{ class: "currency" } <%= monthly.bills %>
+            %td 
+              %span{ class: "currency" } <%= yearly.bills %>
+            %td
+              %span{ class: "percentage" } <%= rate.bills %>
           %tr
             %th Savings
             %td 
               %span{ class: "currency" } <%= daily.savings %>
+            %td
+              %span{ class: "currency" } <%= monthly.savings %>
+            %td 
+              %span{ class: "currency" } <%= yearly.savings %>
+            %td
+              %span{ class: "percentage" } <%= rate.savings %>
           %tr
             %th Cash Flow
-            %td 
+            %td
               %span{ class: "currency" } <%= daily.cashFlow %>
+            %td
+              %span{ class: "currency" } <%= monthly.cashFlow %>
+            %td
+              %span{ class: "currency" } <%= yearly.cashFlow %>
+            %td
+              %span{ class: "percentage" } <%= rate.cashFlow %>
 
 
   %script{ type: "text/html", id: "income_template" }
@@ -230,3 +230,100 @@
       %a{ class: 'edit button' } edit
       %input{ type: 'submit', class: 'button update', value: 'Update' }
       %a{ class: 'cancel' } cancel
+
+  %script{ type: "text/html", id: "expense_template" }
+    %section{ class: "widget table"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Expenses
+        %a{ class: 'button add_new' } Add
+      
+      %div{ class: 'new_row_template' }
+        %div
+          %label Payee
+          %input{ type: 'text', class: "payee" }
+        %div
+          %label Amount
+          %input{ type: 'text', class: "amount" }
+        %div
+          %label Expense
+          %select{ class: "expense" }
+            %option{ value: "" } 
+            %optgroup{ label: 'Budgets' }
+              <% _.each(budgets, function(name) { %><option value="<%= name %>"><%= name %></option><% }); %>
+            %optgroup{ label: 'Bills' }
+              <% _.each(bills, function(name) { %><option value="<%= name %>"><%= name %></option><% }); %>
+        %div
+          %input{ type: 'submit', value: 'Add', class: 'create' }
+          %a{ class: "hide" } cancel
+              
+      %table{ class: 'display datatable' }
+        %thead
+          %tr
+            %th Payee
+            %th Amount
+            %th Expense
+            %th{ class: 'center actions' } Actions
+        %tbody{ id: "expenses_body" }
+
+  %script{ type: "text/html", id: "expense_row_template" }
+    %td
+      %span{ class: 'editable' } <%= payee %>
+      <input type="text" class="payee" value="<%= payee %>" />
+    %td
+      %span{ class: 'editable currency' } <%= amount %>
+      <input type="text" class="amount" value="<%= amount %>" />
+    %td
+      %span{ class: 'editable' } <%= expense %>
+    %td
+      %a{ class: 'button delete' } remove
+      %a{ class: 'button edit' } edit
+      %input{ type: 'submit', class: 'button update', value: 'Update' }
+      %a{ class: 'cancel' } cancel
+
+
+  %script{ type: "text/html", id: "saving_budget_row_template" }
+    %td
+      %span{ class: 'editable' } <%= description %>
+      <input type="text" class="description" value="<%= description %>" />
+    %td
+      %span{ class: 'editable currency' } <%= amount %>
+      <input type="text" class="amount" value="<%= amount %>" />
+    %td
+      %span{ class: 'editable' } <%= timing %>
+      %select{ class: "timing" }
+        <option value="Monthly" <% if (timing == 'Monthly') { %>selected="selected"<% } %>>Monthly</option>
+        <option value="Yearly" <% if (timing == 'Yearly') { %>selected="selected"<% } %>>Yearly</option>
+    %td
+      %a{ class: 'delete button' } remove
+      %a{ class: 'edit button' } edit
+      %input{ type: 'submit', class: 'button update', value: 'Update' }
+      %a{ class: 'cancel' } cancel
+
+
+  %script{ type: "text/html", id: "budgets_template" }
+    %section{ class: "widget table"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Budgets
+        %a{ class: 'button add_new' } Add
+      %table{ class: 'display datatable' }
+        %thead
+          %tr{ class: 'new_row_template' }
+            %td
+              %input{ type: 'text', class: "description" }
+            %td
+              %input{ type: 'text', class: "amount" }
+            %td{ class: 'center' }
+              %select{ class: "timing" }
+                %option{ value: "Monthly" } Monthly
+                %option{ value: "Yearly" } Yearly
+            %td
+              %input{ type: 'submit', value: 'Add', class: 'create' }
+              %a{ class: "hide" } cancel
+          %tr
+            %th Description
+            %th Amount
+            %th Timing
+            %th{ class: 'center actions' } Actions
+        %tbody{ id: "expenses_body" }

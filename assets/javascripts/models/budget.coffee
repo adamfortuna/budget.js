@@ -1,8 +1,8 @@
-window.App.Expense = App.Accounting.extend
+window.App.Budget = App.Accounting.extend
   defaults:
     'amount': 0
-    'payee': null
-    'expense': null
+    'description': null
+    'timing': 'Monthly'
 
   validate: (attributes) ->
     errors = []
@@ -17,10 +17,16 @@ window.App.Expense = App.Accounting.extend
         'field': 'amount'
         'message': 'must be a number'
       )
-
-    if !attributes.payee || attributes.payee.length == 0
+    
+    if !attributes.description || attributes.description.length == 0
       errors.push(
-        'field': 'payee'
+        'field': 'description'
+        'message': 'cannot be empty'
+      )
+
+    if !attributes.timing || attributes.timing.length == 0
+      errors.push(
+        'field': 'timing'
         'message': 'cannot be empty'
       )
 
