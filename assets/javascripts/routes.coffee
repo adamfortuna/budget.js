@@ -8,6 +8,7 @@ window.App.ApplicationController = Backbone.Router.extend
     'expenses': 'expenses'
     'history': 'history'
     'income': 'income'
+    'populate': 'populate'
 
   overview: ->
     stats = new App.StatsView()
@@ -33,6 +34,11 @@ window.App.ApplicationController = Backbone.Router.extend
     expenses = new App.ExpenseTableView()
     $("#main").empty().append(expenses.render())
     
+  populate: ->
+    populate = new App.Populate()
+    populate.run()
+    alert("Data populated!")
+
   history: ->
     @tab('history', 'history')
   

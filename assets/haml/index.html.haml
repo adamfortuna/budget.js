@@ -25,6 +25,7 @@
         %li{ class: "cal" }
           %a{ href: '#expenses' }
             %span Expenses
+            
         / %li{ class: "graphs" }
         /   %a{ href: '#history' }
         /     %span History
@@ -89,6 +90,23 @@
 
 
   %script{ type: "text/html", id: "stats_template" }
+    %section{ class: "widget table"}
+      %div{ class: "head" }
+        %h5{ class: "iFrames" }
+          Welcome!
+      %div{ class: "body" }
+        %p Budget.js will help you get a quick overview your cashflow in just 15 minutes.
+        %p
+          By using a
+          %a{ href: "http://www.mint.com/blog/how-to/a-15-minute-budgeting-move-that-will-save-you-2000-01201", target: "_blank" } quick formula
+          of (income - budgeted expenses - bills - income) you can get a quick look at where your money is going.
+        %p You can also track your individual expenses to get an idea of close you came to your budgets.
+        %p
+          Want to get started?
+          %a{ href: "#populate" } Jump-start your budget with some data!
+        
+        
+      
     %section{ class: "widget table"}
       %div{ class: "head" }
         %h5{ class: "iFrames" }
